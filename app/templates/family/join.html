@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Вступить в семью · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="fb-card p-4">
+        <h1 class="h4 mb-3">Вступить в семью</h1>
+        <p class="text-muted-soft mb-4">
+          Введите код приглашения, который вам передали.
+        </p>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Код приглашения</label>
+            <input type="text" name="invite_code" class="form-control"
+                   placeholder="Например, 3F8K9PQS" required>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            Вступить
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

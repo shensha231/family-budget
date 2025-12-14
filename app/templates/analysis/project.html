@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Инвестиционный проект · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="fb-card p-4 h-100">
+        <h1 class="h5 mb-1">Инвестиционный проект</h1>
+        <p class="text-muted-soft mb-3">
+          NPV показывает, выгоден ли проект с учётом времени (если NPV &gt; 0 — проект приносит ценность).
+          IRR — ставка доходности проекта; ROI — отношение прибыли к вложениям; ЭДС — сколько проект зарабатывает сверх требуемой ставки.
+        </p>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Начальные инвестиции (₽)</label>
+            <input type="number" step="0.01" name="initial" class="form-control" required>
+            <small class="text-muted-soft">
+              Обычно это вложения в нулевой год (можно вводить как положительное число, формула сама вычтет).
+            </small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ставка дисконтирования (% годовых)</label>
+            <input type="number" step="0.01" name="discount_rate" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Режим задания потоков</label>
+            <select name="mode" class="form-select" id="modeSelect" onchange="toggleGeo()">
+              <option value="manual">Ввести вручную по годам</option>
+              <option value="geometric">Геометрическая прогрессия</option>
+            </select>
+          </div>
+
+          <div id="manualBlock">
+            <div class="mb-3">
+              <label class="form-label">Потоки по годам (₽)</label>
+              <textarea name="flows" class="form-control" rows="3"
+                        placeholder="Например: 10000, 15000, 20000">{{ flows_text }}</textarea>
+              <small class="text-muted-soft">
+                Введите значения через запятую: поток за 1‑й год, 2‑й год, 3‑й и т.д.
+              </small>
+            </div>
+          </div>
+
+          <div id="geoBlock" style="display:none;">
+            <div class="mb-3">
+              <label class="form-label">Поток в 1‑й год (₽)</label>
+              <input type="number" step="0.01" name="geo_first" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Рост потока в год (% к предыдущему)</label>
+              <input type="number" step="0.01" name="geo_growth" class="form-control" value="0">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Количество лет</label>
+              <input type="number" name="geo_years" class="form-control" value="5">
+            </div>
+            <small class="text-muted-soft">
+              Потоки будут сгенерированы как геометрическая последовательность.
+            </small>
+          </div>
+
+          <button type="submit" class="btn btn-fb-primary w-100 mt-3">
+            Рассчитать NPV, IRR, ROI, ЭДС
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-3">Результаты</h2>
+        {% if result %}
+          <p class="mb-2">
+            Начальные инвестиции: <strong>{{ "%.2f"|format(result.initial) }} ₽</strong><br>
+            Ставка дисконтирования: <strong>{{ "%.2f"|format(result.rate) }} %</strong>
+          </p>
+
+          <h3 class="h6 mt-3">Денежные потоки</h3>
+          <ul>
+            {% for cf in result.cash_flows %}
+              <li>Год {{ loop.index }}: {{ "%.2f"|format(cf) }} ₽</li>
+            {% endfor %}
+          </ul>
+
+          <hr>
+
+          <p class="mb-1">
+            Чистая приведённая стоимость (NPV / ЧДД):
+            <strong class="{% if result.npv >= 0 %}text-income{% else %}text-expense{% endif %}">
+              {{ "%.2f"|format(result.npv) }} ₽
+            </strong>
+          </p>
+
+          <p class="mb-1">
+            ROI:
+            {% if result.roi is not none %}
+              <strong>{{ "%.2f"|format(result.roi) }} %</strong>
+            {% else %}
+              <span class="text-muted-soft">нельзя посчитать (вложения = 0)</span>
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            Внутренняя норма доходности (IRR):
+            {% if result.irr is not none %}
+              <strong>{{ "%.2f"|format(result.irr) }} %</strong>
+            {% else %}
+              <span class="text-muted-soft">не удалось найти</span>
+            {% endif %}
+          </p>
+
+          <p class="mb-0">
+            Экономическая добавленная стоимость (ЭДС):
+            <strong class="{% if result.eds >= 0 %}text-income{% else %}text-expense{% endif %}">
+              {{ "%.2f"|format(result.eds) }} ₽
+            </strong>
+          </p>
+        {% else %}
+          <p class="mb-0 text-muted-soft">
+            Заполните форму слева и нажмите "Рассчитать".
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+function toggleGeo() {
+  const mode = document.getElementById('modeSelect').value;
+  document.getElementById('manualBlock').style.display = mode === 'manual' ? 'block' : 'none';
+  document.getElementById('geoBlock').style.display = mode === 'geometric' ? 'block' : 'none';
+}
+</script>
+{% endblock %}
+{% endblock %}

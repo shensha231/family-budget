@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}Издержки и спрос · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- Средние издержки -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Средние издержки (AC)</h2>
+        <p class="text-muted-soft mb-3">
+          AC (average cost) показывает, сколько в среднем стоит производство одной единицы товара:
+          AC = TC / Q, где TC — общие издержки, Q — объём выпуска.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="ac">
+          <div class="mb-2">
+            <label class="form-label">Общие издержки (TC)</label>
+            <input type="number" step="0.01" name="tc" class="form-control" required>
+            <small class="text-muted-soft">
+              TC (total cost) — все расходы на выпуск товара (сырьё, зарплаты, аренда и т.п.).
+            </small>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём выпуска (Q)</label>
+            <input type="number" step="0.01" name="q" class="form-control" required>
+            <small class="text-muted-soft">
+              Q — сколько единиц товара произведено (штук, килограмм и т.п.).
+            </small>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">Посчитать AC = TC / Q</button>
+        </form>
+        {% if result.ac %}
+          {% if result.ac.ac is not none %}
+            <p class="mb-0">
+              Средние издержки: <strong>{{ "%.4f"|format(result.ac.ac) }}</strong>
+            </p>
+          {% else %}
+            <p class="mb-0 text-expense">Нельзя делить на ноль (Q = 0).</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Предельные издержки -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Предельные издержки (MC)</h2>
+        <p class="text-muted-soft mb-3">
+          MC (marginal cost) показывает, во сколько обходится выпуск одной дополнительной единицы:
+          MC = ΔC / ΔQ, где ΔC — прирост затрат, ΔQ — прирост объёма выпуска.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="mc">
+          <div class="mb-2">
+            <label class="form-label">Издержки при Q1 (C1)</label>
+            <input type="number" step="0.01" name="c1" class="form-control" required>
+            <small class="text-muted-soft">
+              C1 — общие издержки при исходном объёме выпуска Q1.
+            </small>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Издержки при Q2 (C2)</label>
+            <input type="number" step="0.01" name="c2" class="form-control" required>
+            <small class="text-muted-soft">
+              C2 — общие издержки при новом объёме выпуска Q2.
+            </small>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём Q1</label>
+            <input type="number" step="0.01" name="q1" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём Q2</label>
+            <input type="number" step="0.01" name="q2" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">Посчитать MC = ΔC / ΔQ</button>
+        </form>
+        {% if result.mc %}
+          {% if result.mc.mc is not none %}
+            <p class="mb-1">ΔC = {{ "%.2f"|format(result.mc.delta_c) }}, ΔQ = {{ "%.2f"|format(result.mc.delta_q) }}</p>
+            <p class="mb-0">
+              Предельные издержки: <strong>{{ "%.4f"|format(result.mc.mc) }}</strong>
+            </p>
+          {% else %}
+            <p class="mb-0 text-expense">Нельзя делить на ноль (ΔQ = 0).</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Предельный доход -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Предельный доход (MR)</h2>
+        <p class="text-muted-soft mb-3">
+          MR (marginal revenue) показывает, сколько дополнительного дохода приносит ещё одна единица продажи:
+          MR = ΔB / ΔQ, где B — выручка, Q — объём продаж.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="mr">
+          <div class="mb-2">
+            <label class="form-label">Доход при Q1 (B1)</label>
+            <input type="number" step="0.01" name="b1" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Доход при Q2 (B2)</label>
+            <input type="number" step="0.01" name="b2" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём Q1</label>
+            <input type="number" step="0.01" name="q1_mr" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём Q2</label>
+            <input type="number" step="0.01" name="q2_mr" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">Посчитать MR = ΔB / ΔQ</button>
+        </form>
+        {% if result.mr %}
+          {% if result.mr.mr is not none %}
+            <p class="mb-1">ΔB = {{ "%.2f"|format(result.mr.delta_b) }}, ΔQ = {{ "%.2f"|format(result.mr.delta_q) }}</p>
+            <p class="mb-0">
+              Предельный доход: <strong>{{ "%.4f"|format(result.mr.mr) }}</strong>
+            </p>
+          {% else %}
+            <p class="mb-0 text-expense">Нельзя делить на ноль (ΔQ = 0).</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Эластичность спроса -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Эластичность спроса по цене</h2>
+        <p class="text-muted-soft mb-3">
+          Эластичность показывает, насколько сильно спрос реагирует на изменение цены:
+          E = (ΔQ / Q) / (ΔP / P).
+          Если |E| &gt; 1 — спрос сильно реагирует на цену, если &lt; 1 — реагирует слабо.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="elasticity">
+          <div class="mb-2">
+            <label class="form-label">Объём Q1</label>
+            <input type="number" step="0.01" name="q1_el" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Объём Q2</label>
+            <input type="number" step="0.01" name="q2_el" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Цена P1</label>
+            <input type="number" step="0.01" name="p1_el" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Цена P2</label>
+            <input type="number" step="0.01" name="p2_el" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            Посчитать эластичность спроса
+          </button>
+        </form>
+        {% if result.elasticity %}
+          {% if result.elasticity.elasticity is not none %}
+            {% set e = result.elasticity.elasticity %}
+            <p class="mb-1">
+              Эластичность E ≈ <strong>{{ "%.4f"|format(e) }}</strong>
+            </p>
+            <p class="text-muted-soft mb-0">
+              {% if e|abs > 1 %}
+                |E| &gt; 1: спрос эластичный, покупатели сильно реагируют на цену.
+              {% elif e|abs < 1 %}
+                |E| &lt; 1: спрос неэластичный, цена влияет слабо.
+              {% else %}
+                |E| = 1: спрос меняется пропорционально цене.
+              {% endif %}
+            </p>
+          {% else %}
+            <p class="mb-0 text-expense">Нельзя посчитать (деление на ноль).</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Условия торговли -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Условия торговли (ToT)</h2>
+        <p class="text-muted-soft mb-3">
+          Условия торговли показывают, насколько выгодны цены на экспорт по сравнению с импортом:
+          ToT = Цена экспорта / Цена импорта. Значение &gt; 1 — экспорт относительно дороже, условия выгоднее.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="tot">
+          <div class="mb-2">
+            <label class="form-label">Средняя цена экспорта</label>
+            <input type="number" step="0.01" name="p_exp" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Средняя цена импорта</label>
+            <input type="number" step="0.01" name="p_imp" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            Посчитать условия торговли (Pexp / Pimp)
+          </button>
+        </form>
+        {% if result.tot %}
+          {% if result.tot.tot is not none %}
+            <p class="mb-0">
+              Условия торговли: <strong>{{ "%.4f"|format(result.tot.tot) }}</strong>
+            </p>
+          {% else %}
+            <p class="mb-0 text-expense">Нельзя делить на ноль (цена импорта = 0).</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Количественная теория денег: MV = PQ -->
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-1">Количественная теория денег (MV = PQ)</h2>
+        <p class="text-muted-soft mb-3">
+          M — денежная масса, V — скорость обращения денег, P — уровень цен, Q — объём выпуска.
+          Уравнение MV = PQ означает, что количество денег, потраченное в экономике, равно стоимости всех произведённых товаров и услуг.
+        </p>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="action" value="fisher">
+          <div class="mb-2">
+            <label class="form-label">Что найти?</label>
+            <select name="unknown" class="form-select">
+              <option value="M">Денежную массу (M)</option>
+              <option value="V">Скорость обращения (V)</option>
+              <option value="P">Уровень цен (P)</option>
+              <option value="Q">Объём выпуска (Q)</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">M</label>
+            <input type="number" step="0.01" name="m" class="form-control" placeholder="если считать M, можно оставить 0">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">V</label>
+            <input type="number" step="0.01" name="v" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">P</label>
+            <input type="number" step="0.01" name="p" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Q</label>
+            <input type="number" step="0.01" name="q_f" class="form-control">
+          </div>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            Решить MV = PQ
+          </button>
+        </form>
+        {% if result.fisher %}
+          <p class="mb-0">
+            M = {{ result.fisher.m if result.fisher.m is not none else "—" }},
+            V = {{ result.fisher.v if result.fisher.v is not none else "—" }},
+            P = {{ result.fisher.p if result.fisher.p is not none else "—" }},
+            Q = {{ result.fisher.q if result.fisher.q is not none else "—" }}.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

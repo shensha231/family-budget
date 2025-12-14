@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Научный анализ · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="fb-card p-4">
+    <h1 class="h5 mb-3">Статистика расходов по категориям</h1>
+    {% if rows %}
+      <div class="table-responsive">
+        <table class="table table-dark table-borderless align-middle mb-0">
+          <thead class="text-muted-soft">
+            <tr>
+              <th>Категория</th>
+              <th class="text-end">Кол-во операций</th>
+              <th class="text-end">Средний чек</th>
+              <th class="text-end">Мин. чек</th>
+              <th class="text-end">Макс. чек</th>
+              <th class="text-end">Всего расходов</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat, n, avg, min_v, max_v, total in rows %}
+              <tr>
+                <td>{{ cat }}</td>
+                <td class="text-end">{{ n }}</td>
+                <td class="text-end">{{ "%.2f"|format(avg) }} ₽</td>
+                <td class="text-end">{{ "%.2f"|format(min_v) }} ₽</td>
+                <td class="text-end">{{ "%.2f"|format(max_v) }} ₽</td>
+                <td class="text-end text-expense">-{{ "%.2f"|format(total) }} ₽</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0 text-muted-soft">
+        Пока нет расходов, по которым можно посчитать статистику.
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
