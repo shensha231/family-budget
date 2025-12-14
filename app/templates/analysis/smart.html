@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Умный анализ · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h1 class="h5 mb-3">Сводка по категориям</h1>
+        {% if rows %}
+          <div class="table-responsive">
+            <table class="table table-dark table-borderless align-middle mb-0">
+              <thead class="text-muted-soft">
+                <tr>
+                  <th>Тип</th>
+                  <th>Категория</th>
+                  <th class="text-end">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ttype, cat, total in rows %}
+                  <tr>
+                    <td>
+                      {% if ttype == 'income' %}
+                        <span class="text-income">Доход</span>
+                      {% else %}
+                        <span class="text-expense">Расход</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ cat }}</td>
+                    <td class="text-end">
+                      {% if ttype == 'income' %}
+                        <span class="text-income">+{{ "%.2f"|format(total) }} ₽</span>
+                      {% else %}
+                        <span class="text-expense">-{{ "%.2f"|format(total) }} ₽</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="mb-0 text-muted-soft">Пока недостаточно данных для анализа.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h5 mb-3">Наблюдения</h2>
+        {% if insights %}
+          <ul class="mb-0">
+            {% for line in insights %}
+              <li class="mb-1">{{ line }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="mb-0 text-muted-soft">
+            Добавьте ещё операций, чтобы получить более точный анализ.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

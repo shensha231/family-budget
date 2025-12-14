@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Симулятор формул · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="fb-card p-4">
+    <h1 class="h5 mb-3">Финансовый симулятор</h1>
+    <p class="text-muted-soft mb-4">
+      Выберите формулу, которую хотите рассчитать.
+    </p>
+    <div class="row g-3">
+      <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('analysis.sim_deposit') }}" class="btn btn-fb-primary w-100">
+          Вклад (простые / сложные проценты)
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('analysis.sim_equivalent') }}" class="btn btn-fb-outline w-100">
+          Эквивалентная ставка
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('analysis.sim_real') }}" class="btn btn-fb-outline w-100">
+          Реальная ставка
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <a href="{{ url_for('analysis.sim_loan') }}" class="btn btn-fb-outline w-100">
+          Кредит (аннуитет)
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

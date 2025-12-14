@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Моя семья · Family Budget{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="fb-card p-4">
+        <h1 class="h4 mb-3">
+          {% if family %}Настройки семьи{% else %}Создать семью{% endif %}
+        </h1>
+
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Название семьи</label>
+            <input type="text" name="name" class="form-control"
+                   value="{{ family.name if family else '' }}" required>
+          </div>
+
+          {% if family and family.invite_code %}
+            <div class="mb-3">
+              <label class="form-label">Код приглашения</label>
+              <div class="input-group">
+                <input type="text" class="form-control" value="{{ family.invite_code }}" readonly>
+                <button class="btn btn-fb-outline" type="button"
+                        onclick="navigator.clipboard.writeText('{{ family.invite_code }}')">
+                  Скопировать
+                </button>
+              </div>
+              <small class="text-muted-soft">
+                Отправьте этот код близким, чтобы они могли присоединиться к вашей семье.
+              </small>
+            </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-fb-primary">
+            {% if family %}Сохранить изменения{% else %}Создать семью{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
