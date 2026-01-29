@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Регистрация · Family Budget{% endblock %}
 {% block content %}
+
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-md-5">
@@ -9,25 +10,82 @@
         <p class="text-muted-soft mb-4">
           Создайте аккаунт, чтобы вести семейный бюджет.
         </p>
+        
+        {# Отображение ошибок #}
+        {% with messages = get_flashed_messages(category_filter=['error']) %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        {# Успешные сообщения #}
+        {% with messages = get_flashed_messages(category_filter=['success']) %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
         <form method="post">
           <div class="mb-3">
             <label class="form-label">Имя</label>
             <input type="text" name="name" class="form-control">
           </div>
+          
           <div class="mb-3">
             <label class="form-label">E-mail</label>
             <input type="email" name="email" class="form-control" required>
           </div>
+          
           <div class="mb-3">
             <label class="form-label">Пароль</label>
             <input type="password" name="password" class="form-control" required>
           </div>
+          
           <button type="submit" class="btn btn-fb-primary w-100">
             Зарегистрироваться
           </button>
         </form>
+        
+        <div class="mt-4 text-center">
+          <p class="text-muted-soft">
+            Уже есть аккаунт? 
+            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Войти</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .alert {
+    border-radius: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+  }
+  
+  .alert-danger {
+    background: rgba(249, 115, 115, 0.1);
+    border-color: rgba(249, 115, 115, 0.3);
+    color: #fb7373;
+  }
+  
+  .alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+</style>
+
 {% endblock %}
