@@ -1,272 +1,395 @@
 {% extends "base.html" %}
 {% block title %}Издержки и спрос · Family Budget{% endblock %}
 {% block content %}
+
 <div class="container py-5">
+  <div class="mb-5">
+    <h1 class="h3 mb-2">📊 Издержки и спрос</h1>
+    <p class="text-muted-soft">Экономический анализ для вашего бизнеса</p>
+  </div>
+
   <div class="row g-4">
+    <!-- Средние издержки (AC) -->
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(251,191,36,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-calculator" style="font-size: 24px; color: #fbbf24;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Средние издержки (AC)</h2>
+            <p class="text-muted-soft mb-0 small">Себестоимость одного товара</p>
+          </div>
+        </div>
 
-    <!-- Средние издержки -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Средние издержки (AC)</h2>
-        <p class="text-muted-soft mb-3">
-          AC (average cost) показывает, сколько в среднем стоит производство одной единицы товара:
-          AC = TC / Q, где TC — общие издержки, Q — объём выпуска.
-        </p>
-        <form method="post" class="mb-3">
+        <div style="background: rgba(251,191,36,0.1); border-left: 3px solid #fbbf24; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> Вы открыли пекарню и потратили 50,000 ₽ на производство 1,000 булочек. Средняя стоимость = <strong>50 ₽/булочка</strong>
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="ac">
-          <div class="mb-2">
-            <label class="form-label">Общие издержки (TC)</label>
-            <input type="number" step="0.01" name="tc" class="form-control" required>
-            <small class="text-muted-soft">
-              TC (total cost) — все расходы на выпуск товара (сырьё, зарплаты, аренда и т.п.).
-            </small>
+          <div class="mb-3">
+            <label class="form-label">💰 Общие издержки (TC)</label>
+            <input type="number" step="0.01" name="tc" class="form-control" placeholder="50000" required>
+            <small class="text-muted-soft">Введите всё что потратили на производство</small>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Объём выпуска (Q)</label>
-            <input type="number" step="0.01" name="q" class="form-control" required>
-            <small class="text-muted-soft">
-              Q — сколько единиц товара произведено (штук, килограмм и т.п.).
-            </small>
+          <div class="mb-3">
+            <label class="form-label">📦 Объём выпуска (Q)</label>
+            <input type="number" step="0.01" name="q" class="form-control" placeholder="1000" required>
+            <small class="text-muted-soft">Сколько товара произвели</small>
           </div>
-          <button type="submit" class="btn btn-fb-primary w-100">Посчитать AC = TC / Q</button>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            <i class="bi bi-play-circle me-2"></i> Посчитать AC = TC ÷ Q
+          </button>
         </form>
-        {% if result.ac %}
-          {% if result.ac.ac is not none %}
-            <p class="mb-0">
-              Средние издержки: <strong>{{ "%.4f"|format(result.ac.ac) }}</strong>
-            </p>
-          {% else %}
-            <p class="mb-0 text-expense">Нельзя делить на ноль (Q = 0).</p>
-          {% endif %}
+
+        {% if result.ac and result.ac.ac is not none %}
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px;">
+            <p class="text-muted-soft mb-2">✅ Результат:</p>
+            <p class="mb-0"><strong class="h5" style="color: #22c55e;">{{ "%.2f"|format(result.ac.ac) }} ₽</strong> <span class="text-muted-soft">— цена одного товара</span></p>
+          </div>
+        {% elif result.ac and result.ac.ac is none %}
+          <div class="alert alert-danger mb-0">❌ Ошибка: Q не может быть 0</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Предельные издержки -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Предельные издержки (MC)</h2>
-        <p class="text-muted-soft mb-3">
-          MC (marginal cost) показывает, во сколько обходится выпуск одной дополнительной единицы:
-          MC = ΔC / ΔQ, где ΔC — прирост затрат, ΔQ — прирост объёма выпуска.
-        </p>
-        <form method="post" class="mb-3">
+    <!-- Предельные издержки (MC) -->
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(59,130,246,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-arrow-up-right" style="font-size: 24px; color: #3b82f6;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Предельные издержки (MC)</h2>
+            <p class="text-muted-soft mb-0 small">Цена следующего товара</p>
+          </div>
+        </div>
+
+        <div style="background: rgba(59,130,246,0.1); border-left: 3px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> Произвели 100 булочек за 5,000 ₽, 101-ю булочку за 5,050 ₽. Предельные издержки = <strong>50 ₽</strong>
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="mc">
-          <div class="mb-2">
-            <label class="form-label">Издержки при Q1 (C1)</label>
-            <input type="number" step="0.01" name="c1" class="form-control" required>
-            <small class="text-muted-soft">
-              C1 — общие издержки при исходном объёме выпуска Q1.
-            </small>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">💸 Издержки при Q1 (C1)</label>
+              <input type="number" step="0.01" name="c1" class="form-control" placeholder="5000" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">💸 Издержки при Q2 (C2)</label>
+              <input type="number" step="0.01" name="c2" class="form-control" placeholder="5050" required>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Издержки при Q2 (C2)</label>
-            <input type="number" step="0.01" name="c2" class="form-control" required>
-            <small class="text-muted-soft">
-              C2 — общие издержки при новом объёме выпуска Q2.
-            </small>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q1</label>
+              <input type="number" step="0.01" name="q1" class="form-control" placeholder="100" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q2</label>
+              <input type="number" step="0.01" name="q2" class="form-control" placeholder="101" required>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Объём Q1</label>
-            <input type="number" step="0.01" name="q1" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Объём Q2</label>
-            <input type="number" step="0.01" name="q2" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-fb-primary w-100">Посчитать MC = ΔC / ΔQ</button>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            <i class="bi bi-play-circle me-2"></i> Посчитать MC = ΔC ÷ ΔQ
+          </button>
         </form>
-        {% if result.mc %}
-          {% if result.mc.mc is not none %}
-            <p class="mb-1">ΔC = {{ "%.2f"|format(result.mc.delta_c) }}, ΔQ = {{ "%.2f"|format(result.mc.delta_q) }}</p>
-            <p class="mb-0">
-              Предельные издержки: <strong>{{ "%.4f"|format(result.mc.mc) }}</strong>
-            </p>
-          {% else %}
-            <p class="mb-0 text-expense">Нельзя делить на ноль (ΔQ = 0).</p>
-          {% endif %}
+
+        {% if result.mc and result.mc.mc is not none %}
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px;">
+            <p class="text-muted-soft mb-2">✅ Результат:</p>
+            <p class="mb-0"><strong class="h5" style="color: #22c55e;">{{ "%.2f"|format(result.mc.mc) }} ₽</strong> <span class="text-muted-soft">— издержки на 1 доп. товар</span></p>
+          </div>
+        {% elif result.mc and result.mc.mc is none %}
+          <div class="alert alert-danger mb-0">❌ Ошибка: ΔQ не может быть 0</div>
         {% endif %}
       </div>
     </div>
+    <!-- Предельный доход (MR) -->
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(34,197,94,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-cash-coin" style="font-size: 24px; color: #22c55e;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Предельный доход (MR)</h2>
+            <p class="text-muted-soft mb-0 small">Заработок от следующей продажи</p>
+          </div>
+        </div>
 
-    <!-- Предельный доход -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Предельный доход (MR)</h2>
-        <p class="text-muted-soft mb-3">
-          MR (marginal revenue) показывает, сколько дополнительного дохода приносит ещё одна единица продажи:
-          MR = ΔB / ΔQ, где B — выручка, Q — объём продаж.
-        </p>
-        <form method="post" class="mb-3">
+        <div style="background: rgba(34,197,94,0.1); border-left: 3px solid #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> Продав 100 булочек заработали 5,000 ₽, 101-ю булочку за 5,048 ₽. Предельный доход = <strong>48 ₽</strong>
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="mr">
-          <div class="mb-2">
-            <label class="form-label">Доход при Q1 (B1)</label>
-            <input type="number" step="0.01" name="b1" class="form-control" required>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">📈 Доход при Q1 (B1)</label>
+              <input type="number" step="0.01" name="b1" class="form-control" placeholder="5000" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">📈 Доход при Q2 (B2)</label>
+              <input type="number" step="0.01" name="b2" class="form-control" placeholder="5048" required>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Доход при Q2 (B2)</label>
-            <input type="number" step="0.01" name="b2" class="form-control" required>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q1</label>
+              <input type="number" step="0.01" name="q1_mr" class="form-control" placeholder="100" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q2</label>
+              <input type="number" step="0.01" name="q2_mr" class="form-control" placeholder="101" required>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Объём Q1</label>
-            <input type="number" step="0.01" name="q1_mr" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Объём Q2</label>
-            <input type="number" step="0.01" name="q2_mr" class="form-control" required>
-          </div>
-          <button type="submit" class="btn btn-fb-primary w-100">Посчитать MR = ΔB / ΔQ</button>
+          <button type="submit" class="btn btn-fb-primary w-100">
+            <i class="bi bi-play-circle me-2"></i> Посчитать MR = ΔB ÷ ΔQ
+          </button>
         </form>
-        {% if result.mr %}
-          {% if result.mr.mr is not none %}
-            <p class="mb-1">ΔB = {{ "%.2f"|format(result.mr.delta_b) }}, ΔQ = {{ "%.2f"|format(result.mr.delta_q) }}</p>
-            <p class="mb-0">
-              Предельный доход: <strong>{{ "%.4f"|format(result.mr.mr) }}</strong>
-            </p>
-          {% else %}
-            <p class="mb-0 text-expense">Нельзя делить на ноль (ΔQ = 0).</p>
-          {% endif %}
+
+        {% if result.mr and result.mr.mr is not none %}
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px;">
+            <p class="text-muted-soft mb-2">✅ Результат:</p>
+            <p class="mb-0"><strong class="h5" style="color: #22c55e;">{{ "%.2f"|format(result.mr.mr) }} ₽</strong> <span class="text-muted-soft">— доход от 1 доп. продажи</span></p>
+          </div>
+        {% elif result.mr and result.mr.mr is none %}
+          <div class="alert alert-danger mb-0">❌ Ошибка: ΔQ не может быть 0</div>
         {% endif %}
       </div>
     </div>
 
     <!-- Эластичность спроса -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Эластичность спроса по цене</h2>
-        <p class="text-muted-soft mb-3">
-          Эластичность показывает, насколько сильно спрос реагирует на изменение цены:
-          E = (ΔQ / Q) / (ΔP / P).
-          Если |E| &gt; 1 — спрос сильно реагирует на цену, если &lt; 1 — реагирует слабо.
-        </p>
-        <form method="post" class="mb-3">
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(168,85,247,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-graph-up-arrow" style="font-size: 24px; color: #a855f7;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Эластичность спроса</h2>
+            <p class="text-muted-soft mb-0 small">Чувствительность к цене</p>
+          </div>
+        </div>
+
+        <div style="background: rgba(168,85,247,0.1); border-left: 3px solid #a855f7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> Повысили цену на 10% → продажи упали на 15%. Эластичность = <strong>1.5</strong> (спрос чувствителен к цене)
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="elasticity">
-          <div class="mb-2">
-            <label class="form-label">Объём Q1</label>
-            <input type="number" step="0.01" name="q1_el" class="form-control" required>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q1</label>
+              <input type="number" step="0.01" name="q1_el" class="form-control" placeholder="100" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">📦 Объём Q2</label>
+              <input type="number" step="0.01" name="q2_el" class="form-control" placeholder="85" required>
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">Объём Q2</label>
-            <input type="number" step="0.01" name="q2_el" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Цена P1</label>
-            <input type="number" step="0.01" name="p1_el" class="form-control" required>
-          </div>
-          <div class="mb-2">
-            <label class="form-label">Цена P2</label>
-            <input type="number" step="0.01" name="p2_el" class="form-control" required>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">💰 Цена P1</label>
+              <input type="number" step="0.01" name="p1_el" class="form-control" placeholder="50" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">💰 Цена P2</label>
+              <input type="number" step="0.01" name="p2_el" class="form-control" placeholder="55" required>
+            </div>
           </div>
           <button type="submit" class="btn btn-fb-primary w-100">
-            Посчитать эластичность спроса
+            <i class="bi bi-play-circle me-2"></i> Посчитать эластичность
           </button>
         </form>
-        {% if result.elasticity %}
-          {% if result.elasticity.elasticity is not none %}
-            {% set e = result.elasticity.elasticity %}
-            <p class="mb-1">
-              Эластичность E ≈ <strong>{{ "%.4f"|format(e) }}</strong>
-            </p>
-            <p class="text-muted-soft mb-0">
+
+        {% if result.elasticity and result.elasticity.elasticity is not none %}
+          {% set e = result.elasticity.elasticity %}
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px;">
+            <p class="text-muted-soft mb-2">✅ Результат:</p>
+            <p class="mb-1"><strong class="h5" style="color: #22c55e;">{{ "%.2f"|format(e|abs) }}</strong></p>
+            <small>
               {% if e|abs > 1 %}
-                |E| &gt; 1: спрос эластичный, покупатели сильно реагируют на цену.
+                ✓ Спрос эластичный - покупатели сильно реагируют на цену
               {% elif e|abs < 1 %}
-                |E| &lt; 1: спрос неэластичный, цена влияет слабо.
+                ✓ Спрос неэластичный - цена влияет слабо
               {% else %}
-                |E| = 1: спрос меняется пропорционально цене.
+                ✓ Спрос меняется пропорционально цене
               {% endif %}
-            </p>
-          {% else %}
-            <p class="mb-0 text-expense">Нельзя посчитать (деление на ноль).</p>
-          {% endif %}
+            </small>
+          </div>
+        {% elif result.elasticity and result.elasticity.elasticity is none %}
+          <div class="alert alert-danger mb-0">❌ Ошибка: невозможно посчитать</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Условия торговли -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Условия торговли (ToT)</h2>
-        <p class="text-muted-soft mb-3">
-          Условия торговли показывают, насколько выгодны цены на экспорт по сравнению с импортом:
-          ToT = Цена экспорта / Цена импорта. Значение &gt; 1 — экспорт относительно дороже, условия выгоднее.
-        </p>
-        <form method="post" class="mb-3">
+    <!-- Условия торговли (ToT) -->
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(239,68,68,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-arrow-left-right" style="font-size: 24px; color: #ef4444;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Условия торговли (ToT)</h2>
+            <p class="text-muted-soft mb-0 small">Соотношение экспорта и импорта</p>
+          </div>
+        </div>
+
+        <div style="background: rgba(239,68,68,0.1); border-left: 3px solid #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> Вы продаёте булочки за границу по 100 ₽, импортируете муку по 50 ₽/кг. ToT = 100 ÷ 50 = <strong>2.0</strong> (выгодно!)
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="tot">
-          <div class="mb-2">
-            <label class="form-label">Средняя цена экспорта</label>
-            <input type="number" step="0.01" name="p_exp" class="form-control" required>
+          <div class="mb-3">
+            <label class="form-label">📊 Цена экспорта</label>
+            <input type="number" step="0.01" name="p_exp" class="form-control" placeholder="100" required>
+            <small class="text-muted-soft">За что вы продаёте свой товар</small>
           </div>
           <div class="mb-3">
-            <label class="form-label">Средняя цена импорта</label>
-            <input type="number" step="0.01" name="p_imp" class="form-control" required>
+            <label class="form-label">📊 Цена импорта</label>
+            <input type="number" step="0.01" name="p_imp" class="form-control" placeholder="50" required>
+            <small class="text-muted-soft">Сколько платите за импортные товары</small>
           </div>
           <button type="submit" class="btn btn-fb-primary w-100">
-            Посчитать условия торговли (Pexp / Pimp)
+            <i class="bi bi-play-circle me-2"></i> Посчитать ToT = Экспорт ÷ Импорт
           </button>
         </form>
-        {% if result.tot %}
-          {% if result.tot.tot is not none %}
-            <p class="mb-0">
-              Условия торговли: <strong>{{ "%.4f"|format(result.tot.tot) }}</strong>
-            </p>
-          {% else %}
-            <p class="mb-0 text-expense">Нельзя делить на ноль (цена импорта = 0).</p>
-          {% endif %}
+
+        {% if result.tot and result.tot.tot is not none %}
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px;">
+            <p class="text-muted-soft mb-2">✅ Результат:</p>
+            <p class="mb-0"><strong class="h5" style="color: #22c55e;">{{ "%.2f"|format(result.tot.tot) }}</strong> <span class="text-muted-soft">— соотношение цен</span></p>
+          </div>
+        {% elif result.tot and result.tot.tot is none %}
+          <div class="alert alert-danger mb-0">❌ Ошибка: цена импорта не может быть 0</div>
         {% endif %}
       </div>
     </div>
-
     <!-- Количественная теория денег: MV = PQ -->
-    <div class="col-md-6">
-      <div class="fb-card p-4 h-100">
-        <h2 class="h5 mb-1">Количественная теория денег (MV = PQ)</h2>
-        <p class="text-muted-soft mb-3">
-          M — денежная масса, V — скорость обращения денег, P — уровень цен, Q — объём выпуска.
-          Уравнение MV = PQ означает, что количество денег, потраченное в экономике, равно стоимости всех произведённых товаров и услуг.
-        </p>
-        <form method="post" class="mb-3">
+    <div class="col-lg-6">
+      <div class="fb-card p-5">
+        <div class="d-flex align-items-center mb-4">
+          <div style="width: 50px; height: 50px; background: rgba(14,165,233,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+            <i class="bi bi-bank2" style="font-size: 24px; color: #0ea5e9;"></i>
+          </div>
+          <div>
+            <h2 class="h5 mb-0">Количественная теория денег</h2>
+            <p class="text-muted-soft mb-0 small">Уравнение MV = PQ</p>
+          </div>
+        </div>
+
+        <div style="background: rgba(14,165,233,0.1); border-left: 3px solid #0ea5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>💡 Пример:</strong> В экономике циркулирует 100,000 ₽ (M), каждая рубль тратится 5 раз в год (V). Производство товаров = PQ = 100,000 × 5 = 500,000 ₽
+        </div>
+
+        <form method="post" class="mb-4">
           <input type="hidden" name="action" value="fisher">
-          <div class="mb-2">
-            <label class="form-label">Что найти?</label>
+          
+          <div class="mb-3">
+            <label class="form-label">🎯 Что найти?</label>
             <select name="unknown" class="form-select">
               <option value="M">Денежную массу (M)</option>
               <option value="V">Скорость обращения (V)</option>
               <option value="P">Уровень цен (P)</option>
               <option value="Q">Объём выпуска (Q)</option>
             </select>
+            <small class="text-muted-soft">Выберите, что нужно найти</small>
           </div>
-          <div class="mb-2">
-            <label class="form-label">M</label>
-            <input type="number" step="0.01" name="m" class="form-control" placeholder="если считать M, можно оставить 0">
+
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">M - Денежная масса</label>
+              <input type="number" step="0.01" name="m" class="form-control" placeholder="100000">
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">V - Скорость обращения</label>
+              <input type="number" step="0.01" name="v" class="form-control" placeholder="5">
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">V</label>
-            <input type="number" step="0.01" name="v" class="form-control">
+
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">P - Уровень цен</label>
+              <input type="number" step="0.01" name="p" class="form-control" placeholder="1">
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Q - Объём выпуска</label>
+              <input type="number" step="0.01" name="q_f" class="form-control" placeholder="500000">
+            </div>
           </div>
-          <div class="mb-2">
-            <label class="form-label">P</label>
-            <input type="number" step="0.01" name="p" class="form-control">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Q</label>
-            <input type="number" step="0.01" name="q_f" class="form-control">
-          </div>
+
           <button type="submit" class="btn btn-fb-primary w-100">
-            Решить MV = PQ
+            <i class="bi bi-play-circle me-2"></i> Решить уравнение MV = PQ
           </button>
         </form>
+
         {% if result.fisher %}
-          <p class="mb-0">
-            M = {{ result.fisher.m if result.fisher.m is not none else "—" }},
-            V = {{ result.fisher.v if result.fisher.v is not none else "—" }},
-            P = {{ result.fisher.p if result.fisher.p is not none else "—" }},
-            Q = {{ result.fisher.q if result.fisher.q is not none else "—" }}.
-          </p>
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px; font-size: 0.9rem;">
+            <p class="text-muted-soft mb-2">✅ Результаты:</p>
+            <p class="mb-1"><strong>M:</strong> {{ result.fisher.m if result.fisher.m is not none else "—" }}</p>
+            <p class="mb-1"><strong>V:</strong> {{ result.fisher.v if result.fisher.v is not none else "—" }}</p>
+            <p class="mb-1"><strong>P:</strong> {{ result.fisher.p if result.fisher.p is not none else "—" }}</p>
+            <p class="mb-0"><strong>Q:</strong> {{ result.fisher.q if result.fisher.q is not none else "—" }}</p>
+          </div>
         {% endif %}
       </div>
     </div>
-
   </div>
 </div>
+
+<!-- Дополнительные стили -->
+<style>
+  .feature-icon-bg {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .example-box {
+    background: rgba(251, 191, 36, 0.08);
+    border-left: 3px solid #fbbf24;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .result-box {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+  }
+
+  .result-box p {
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .fb-card {
+      padding: 1.5rem !important;
+    }
+
+    .fb-card p {
+      font-size: 0.9rem;
+    }
+
+    .row {
+      margin-right: 0;
+      margin-left: 0;
+    }
+  }
+</style>
+
 {% endblock %}
