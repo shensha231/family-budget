@@ -11,7 +11,11 @@ login_manager.login_view = "auth.login"
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
-
+    
+    # ✨ ДОБАВЬ ЭТИ 2 СТРОКИ:
+    from .optimizations import init_optimizations
+    app = init_optimizations(app)
+    
     # Инициализация расширений
     db.init_app(app)
     Migrate(app, db)
