@@ -1,8 +1,7 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request  # ← Добавлен request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
-from flask_compress import Compress  # ← НОВАЯ СТРОКА
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -13,8 +12,15 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
     
-    # ✨ ДОБАВЛЕННЫЕ 2 СТРОКИ
-    Compress(app)  # Включает сжатие для всех ответов
+    # Кэширование статических файлов
+    @app.after_request
+    def add_cache_headers(response):
+        """Добавляет заголовки кэширования для статических файлов"""
+        if '/static/' in request.path:
+            # Кэшировать статику на 1 год
+            response.cache_control.max_age = 31536000
+            response.cache_control.public = True
+        return response
     
     # Инициализация расширений
     db.init_app(app)
