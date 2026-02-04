@@ -1,91 +1,332 @@
 {% extends "base.html" %}
 {% block title %}Регистрация · Family Budget{% endblock %}
 {% block content %}
-
 <div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="fb-card p-4">
-        <h1 class="h4 mb-3">Регистрация</h1>
-        <p class="text-muted-soft mb-4">
-          Создайте аккаунт, чтобы вести семейный бюджет.
-        </p>
-        
-        {# Отображение ошибок #}
-        {% with messages = get_flashed_messages(category_filter=['error']) %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        {# Успешные сообщения #}
-        {% with messages = get_flashed_messages(category_filter=['success']) %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">Имя</label>
-            <input type="text" name="name" class="form-control">
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">E-mail</label>
-            <input type="email" name="email" class="form-control" required>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">Пароль</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          
-          <button type="submit" class="btn btn-fb-primary w-100">
-            Зарегистрироваться
-          </button>
-        </form>
-        
-        <div class="mt-4 text-center">
-          <p class="text-muted-soft">
-            Уже есть аккаунт? 
-            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Войти</a>
-          </p>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="fb-card p-4">
+                <h1 class="h4 mb-3">Регистрация</h1>
+                <p class="text-muted-soft mb-4">
+                    Создайте аккаунт, чтобы вести семейный бюджет.
+                </p>
+                
+                {# Отображение ошибок #}
+                {% with messages = get_flashed_messages(category_filter=['error']) %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                {# Успешные сообщения #}
+                {% with messages = get_flashed_messages(category_filter=['success']) %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                <form method="post" id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label">Имя</label>
+                        <input type="text" name="name" id="registerName" class="form-control" autocomplete="name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" id="registerEmail" class="form-control" required autocomplete="email">
+                        <div class="invalid-feedback">Введите корректный email</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="password" id="registerPassword" class="form-control" required autocomplete="new-password" minlength="8">
+                            <button type="button" class="password-toggle-btn" id="toggleRegisterPassword" aria-label="Показать пароль">
+                                <i class="bi bi-eye" id="eyeIconRegister"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="passwordError">Пароль не соответствует требованиям</div>
+                        
+                        {# Password requirements #}
+                        <div class="password-requirements mt-2">
+                            <small class="text-muted-soft d-block mb-1">Пароль должен содержать:</small>
+                            <small class="requirement" id="req-length">
+                                <i class="bi bi-circle"></i> Минимум 8 символов
+                            </small>
+                            <small class="requirement" id="req-latin">
+                                <i class="bi bi-circle"></i> Латинские буквы (a-z, A-Z)
+                            </small>
+                            <small class="requirement" id="req-number">
+                                <i class="bi bi-circle"></i> Хотя бы одну цифру (0-9)
+                            </small>
+                            <small class="requirement" id="req-special">
+                                <i class="bi bi-circle"></i> Специальный символ (!@#$%^&*)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-fb-primary w-100" id="registerBtn">
+                        <span class="btn-text">Зарегистрироваться</span>
+                        <span class="btn-loader d-none">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Регистрация...
+                        </span>
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-muted-soft">
+                        Уже есть аккаунт? 
+                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Войти</a>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <style>
-  .alert {
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-  }
-  
-  .alert-danger {
-    background: rgba(249, 115, 115, 0.1);
-    border-color: rgba(249, 115, 115, 0.3);
-    color: #fb7373;
-  }
-  
-  .alert-success {
-    background: rgba(34, 197, 94, 0.1);
-    border-color: rgba(34, 197, 94, 0.3);
-    color: #22c55e;
-  }
+    .alert {
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    
+    .alert-danger {
+        background: rgba(249, 115, 115, 0.1);
+        border-color: rgba(249, 115, 115, 0.3);
+        color: #fb7373;
+    }
+    
+    .alert-success {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #22c55e;
+    }
+    
+    .password-input-wrapper {
+        position: relative;
+    }
+    
+    .password-input-wrapper input {
+        padding-right: 45px;
+    }
+    
+    .password-toggle-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 5px 10px;
+        transition: color 0.2s;
+    }
+    
+    .password-toggle-btn:hover {
+        color: #667eea;
+    }
+    
+    .password-toggle-btn:focus {
+        outline: none;
+    }
+    
+    .password-requirements {
+        padding: 10px;
+        background: rgba(148, 163, 184, 0.05);
+        border-radius: 0.5rem;
+    }
+    
+    .requirement {
+        display: block;
+        color: #94a3b8;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+        transition: color 0.2s;
+    }
+    
+    .requirement i {
+        font-size: 0.5rem;
+        margin-right: 0.5rem;
+    }
+    
+    .requirement.met {
+        color: #22c55e
+    }
+    
+    .requirement.met i {
+        content: "✓";
+    }
+    
+    .requirement.met .bi-circle::before {
+        content: "\f26b"; /* bi-check-circle-fill */
+    }
+    
+    .form-control.is-invalid {
+        border-color: #f97373;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #f97373;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    
+    .btn-loader {
+        display: none;
+    }
+    
+    .btn-loader.d-none {
+        display: none !important;
+    }
+    
+    .btn-text {
+        display: inline;
+    }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility for registration
+    const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
+    const registerPassword = document.getElementById('registerPassword');
+    const eyeIconRegister = document.getElementById('eyeIconRegister');
+    
+    if (toggleRegisterPassword && registerPassword) {
+        toggleRegisterPassword.addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            registerPassword.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIconRegister.classList.remove('bi-eye');
+                eyeIconRegister.classList.add('bi-eye-slash');
+            } else {
+                eyeIconRegister.classList.remove('bi-eye-slash');
+                eyeIconRegister.classList.add('bi-eye');
+            }
+        });
+    }
+    
+    // Password validation requirements
+    const requirements = {
+        length: {
+            regex: /.{8,}/,
+            element: document.getElementById('req-length')
+        },
+        latin: {
+            regex: /[a-zA-Z]/,
+            element: document.getElementById('req-latin')
+        },
+        number: {
+            regex: /[0-9]/,
+            element: document.getElementById('req-number')
+        },
+        special: {
+            regex: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+            element: document.getElementById('req-special')
+        }
+    };
+    
+    // Real-time password validation
+    if (registerPassword) {
+        registerPassword.addEventListener('input', function() {
+            const value = this.value;
+            let allMet = true;
+            
+            for (let key in requirements) {
+                const req = requirements[key];
+                if (req.regex.test(value)) {
+                    req.element.classList.add('met');
+                } else {
+                    req.element.classList.remove('met');
+                    allMet = false;
+                }
+            }
+            
+            // Remove invalid class if all requirements are met
+            if (allMet && value.length > 0) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Form validation
+    const registerForm = document.getElementById('registerForm');
+    const registerEmail = document.getElementById('registerEmail');
+    const registerBtn = document.getElementById('registerBtn');
+    
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Validate email
+            if (!registerEmail.value || !registerEmail.validity.valid) {
+                registerEmail.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                registerEmail.classList.remove('is-invalid');
+            }
+            
+            // Validate password with all requirements
+            const password = registerPassword.value;
+            let passwordValid = true;
+            
+            for (let key in requirements) {
+                if (!requirements[key].regex.test(password)) {
+                    passwordValid = false;
+                    break;
+                }
+            }
+            
+            if (!passwordValid || password.length < 8) {
+                registerPassword.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                registerPassword.classList.remove('is-invalid');
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            const btnText = registerBtn.querySelector('.btn-text');
+            const btnLoader = registerBtn.querySelector('.btn-loader');
+            if (btnText && btnLoader) {
+                btnText.style.display = 'none';
+                btnLoader.classList.remove('d-none');
+                registerBtn.disabled = true;
+            }
+        });
+        
+        // Remove invalid class on input
+        [registerEmail, registerPassword].forEach(input => {
+            if (input) {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

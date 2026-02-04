@@ -1,86 +1,226 @@
 {% extends "base.html" %}
 {% block title %}Вход · Family Budget{% endblock %}
 {% block content %}
-
 <div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="fb-card p-4">
-        <h1 class="h4 mb-3">Вход</h1>
-        <p class="text-muted-soft mb-4">
-          Введите почту и пароль, чтобы войти.
-        </p>
-        
-        {# Отображение ошибок #}
-        {% with messages = get_flashed_messages(category_filter=['error']) %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        {# Успешные сообщения #}
-        {% with messages = get_flashed_messages(category_filter=['success']) %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-        
-        <form method="post">
-          <div class="mb-3">
-            <label class="form-label">E-mail</label>
-            <input type="email" name="email" class="form-control" required>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">Пароль</label>
-            <input type="password" name="password" class="form-control" required>
-          </div>
-          
-          <button type="submit" class="btn btn-fb-primary w-100">
-            Войти
-          </button>
-        </form>
-        
-        <div class="mt-4 text-center">
-          <p class="text-muted-soft">
-            Нет аккаунта? 
-            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Зарегистрируйтесь</a>
-          </p>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="fb-card p-4">
+                <h1 class="h4 mb-3">Вход</h1>
+                <p class="text-muted-soft mb-4">
+                    Введите почту и пароль, чтобы войти.
+                </p>
+                
+                {# Отображение ошибок #}
+                {% with messages = get_flashed_messages(category_filter=['error']) %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                {# Успешные сообщения #}
+                {% with messages = get_flashed_messages(category_filter=['success']) %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                
+                <form method="post" id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" id="loginEmail" class="form-control" required autocomplete="email">
+                        <div class="invalid-feedback">Введите корректный email</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" id="toggleLoginPassword" aria-label="Показать пароль">
+                                <i class="bi bi-eye" id="eyeIconLogin"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Введите пароль</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-fb-primary w-100" id="loginBtn">
+                        <span class="btn-text">Войти</span>
+                        <span class="btn-loader d-none">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Вход...
+                        </span>
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-muted-soft">
+                        Нет аккаунта? 
+                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Зарегистрируйтесь</a>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <style>
-  .alert {
-    border-radius: 1rem;
-    border: 1px solid rgba(148, 163, 184, 0.35);
-  }
-  
-  .alert-danger {
-    background: rgba(249, 115, 115, 0.1);
-    border-color: rgba(249, 115, 115, 0.3);
-    color: #fb7373;
-  }
-  
-  .alert-success {
-    background: rgba(34, 197, 94, 0.1);
-    border-color: rgba(34, 197, 94, 0.3);
-    color: #22c55e;
-  }
+    .alert {
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    
+    .alert-danger {
+        background: rgba(249, 115, 115, 0.1);
+        border-color: rgba(249, 115, 115, 0.3);
+        color: #fb7373;
+    }
+    
+    .alert-success {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #22c55e;
+    }
+    
+    .password-input-wrapper {
+        position: relative;
+    }
+    
+    .password-input-wrapper input {
+        padding-right: 45px;
+    }
+    
+    .password-toggle-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 5px 10px;
+        transition: color 0.2s;
+    }
+    
+    .password-toggle-btn:hover {
+        color: #667eea;
+    }
+    
+    .password-toggle-btn:focus {
+        outline: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #f97373;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #f97373;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    
+    .btn-loader {
+        display: none;
+    }
+    
+    .btn-loader.d-none {
+        display: none !important;
+    }
+    
+    .btn-text {
+        display: inline;
+    }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility for login
+    const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+    const loginPassword = document.getElementById('loginPassword');
+    const eyeIconLogin = document.getElementById('eyeIconLogin');
+    
+    if (toggleLoginPassword && loginPassword) {
+        toggleLoginPassword.addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            loginPassword.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIconLogin.classList.remove('bi-eye');
+                eyeIconLogin.classList.add('bi-eye-slash');
+            } else {
+                eyeIconLogin.classList.remove('bi-eye-slash');
+                eyeIconLogin.classList.add('bi-eye');
+            }
+        });
+    }
+    
+    // Form validation
+    const loginForm = document.getElementById('loginForm');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Validate email
+            if (!loginEmail.value || !loginEmail.validity.valid) {
+                loginEmail.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                loginEmail.classList.remove('is-invalid');
+            }
+            
+            // Validate password
+            if (!loginPassword.value) {
+                loginPassword.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                loginPassword.classList.remove('is-invalid');
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            const btnText = loginBtn.querySelector('.btn-text');
+            const btnLoader = loginBtn.querySelector('.btn-loader');
+            if (btnText && btnLoader) {
+                btnText.style.display = 'none';
+                btnLoader.classList.remove('d-none');
+                loginBtn.disabled = true;
+            }
+        });
+        
+        // Remove invalid class on input
+        [loginEmail, loginPassword].forEach(input => {
+            if (input) {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
