@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+from flask_compress import Compress  # ← НОВАЯ СТРОКА
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -12,6 +13,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
     
+    # ✨ ДОБАВЛЕННЫЕ 2 СТРОКИ
+    Compress(app)  # Включает сжатие для всех ответов
     
     # Инициализация расширений
     db.init_app(app)
