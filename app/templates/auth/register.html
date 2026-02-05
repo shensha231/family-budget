@@ -76,6 +76,18 @@
                         </div>
                     </div>
                     
+                    <!-- Поле для повтора пароля -->
+                    <div class="mb-3">
+                        <label class="form-label">Повторите пароль</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="confirm_password" id="registerConfirmPassword" class="form-control" required autocomplete="new-password" minlength="8">
+                            <button type="button" class="password-toggle-btn" id="toggleConfirmPassword" aria-label="Показать пароль">
+                                <i class="bi bi-eye" id="eyeIconConfirm"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback" id="confirmPasswordError">Пароли не совпадают</div>
+                    </div>
+                    
                     <button type="submit" class="btn btn-fb-primary w-100" id="registerBtn">
                         <span class="btn-text">Зарегистрироваться</span>
                         <span class="btn-loader d-none">
@@ -225,6 +237,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Toggle password visibility for confirm password
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('registerConfirmPassword');
+    const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+
+    if (toggleConfirmPassword && confirmPassword) {
+        toggleConfirmPassword.addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIconConfirm.classList.remove('bi-eye');
+                eyeIconConfirm.classList.add('bi-eye-slash');
+            } else {
+                eyeIconConfirm.classList.remove('bi-eye-slash');
+                eyeIconConfirm.classList.add('bi-eye');
+            }
+        });
+    }
+
+    // Проверка совпадения паролей в реальном времени
+    if (registerPassword && confirmPassword) {
+        confirmPassword.addEventListener('input', function() {
+            if (this.value !== registerPassword.value) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
     // Password validation requirements
     const requirements = {
         length: {
@@ -265,6 +309,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (allMet && value.length > 0) {
                 this.classList.remove('is-invalid');
             }
+            
+            // Проверяем совпадение паролей при изменении основного пароля
+            if (confirmPassword && confirmPassword.value) {
+                if (confirmPassword.value !== value) {
+                    confirmPassword.classList.add('is-invalid');
+                } else {
+                    confirmPassword.classList.remove('is-invalid');
+                }
+            }
         });
     }
     
@@ -303,6 +356,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 registerPassword.classList.remove('is-invalid');
             }
             
+            // Validate password confirmation
+            if (confirmPassword && confirmPassword.value !== password) {
+                confirmPassword.classList.add('is-invalid');
+                isValid = false;
+            } else if (confirmPassword) {
+                confirmPassword.classList.remove('is-invalid');
+            }
+            
             if (!isValid) {
                 e.preventDefault();
                 return false;
@@ -319,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Remove invalid class on input
-        [registerEmail, registerPassword].forEach(input => {
+        [registerEmail, registerPassword, confirmPassword].forEach(input => {
             if (input) {
                 input.addEventListener('input', function() {
                     this.classList.remove('is-invalid');
