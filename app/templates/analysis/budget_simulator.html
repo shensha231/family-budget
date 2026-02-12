@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Симулятор бюджета · Family Budget{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Заголовок -->
+    <div class="col-12">
+      <div class="text-center mb-4">
+        <h1 class="h3 mb-2">🎯 Симулятор бюджета "Что если?"</h1>
+        <p class="text-muted-soft">Спланируйте изменения в бюджете и получите AI-анализ от DeepSeek</p>
+      </div>
+    </div>
+
+    <!-- Текущее состояние -->
+    <div class="col-md-4">
+      <div class="fb-card p-4 h-100">
+        <h2 class="h6 text-muted-soft mb-3">📊 Текущее состояние</h2>
+        <div class="mb-3">
+          <p class="mb-1 text-muted-soft">Средний доход:</p>
+          <p class="h5 text-income mb-0">{{ current_stats.avg_income or 0 }} ₽/мес</p>
+        </div>
+        <div class="mb-3">
+          <p class="mb-1 text-muted-soft">Средний расход:</p>
+          <p class="h5 text-expense mb-0">{{ current_stats.avg_expense or 0 }} ₽/мес</p>
+        </div>
+        <div class="mb-3">
+          <p class="mb-1 text-muted-soft">Баланс:</p>
+          <p class="h5 mb-0">{{ current_stats.balance or 0 }} ₽/мес</p>
+        </div>
+
+        {% if current_stats.expense_by_category %}
+        <hr>
+        <h3 class="h6 text-muted-soft mb-2">Расходы по категориям:</h3>
+        <div class="small">
+          {% for cat, amount in current_stats.expense_by_category.items() %}
+          <div class="d-flex justify-content-between mb-1">
+            <span>{{ cat }}</span>
+            <span>{{ amount }} ₽</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Форма симуляции -->
+    <div class="col-md-8">
+      <div class="fb-card p-4">
+        <h2 class="h6 text-muted-soft mb-3">⚙️ Планируемые изменения</h2>
+        
+        <form method="post" id="simulation-form">
+          <div class="row g-3">
+            <!-- Увеличение дохода -->
+            <div class="col-md-6">
+              <label class="form-label">💰 Увеличить доход на (₽)</label>
+              <input type="number" step="1" name="increase_income" class="form-control" value="0" placeholder="Например: 10000">
+              <small class="text-muted">Повышение, подработка</small>
+            </div>
+
+            <!-- Уменьшение расходов -->
+            <div class="col-md-6">
+              <label class="form-label">📉 Уменьшить расходы в категории</label>
+              <select name="reduce_category" class="form-select" id="reduce-cat">
+                <option value="">Не менять</option>
+                {% for cat in current_stats.categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Процент сокращения -->
+            <div class="col-md-6">
+              <label class="form-label">На сколько процентов сократить?</label>
+              <input type="number" step="1" name="reduce_percent" class="form-control" value="0" min="0" max="100" placeholder="Например: 20">
+              <small class="text-muted">От 0% до 100%</small>
+            </div>
+
+            <!-- Период симуляции -->
+            <div class="col-md-6">
+              <label class="form-label">⏱️ Период симуляции (месяцев)</label>
+              <select name="simulation_months" class="form-select">
+                <option value="3">3 месяца</option>
+                <option value="6" selected>6 месяцев</option>
+                <option value="12">1 год</option>
+                <option value="24">2 года</option>
+              </select>
+            </div>
+
+            <!-- Кнопка -->
+            <div class="col-12">
+              <button type="submit" class="btn btn-fb-primary btn-lg w-100">
+                🚀 Запустить симуляцию с AI-анализом
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Результаты симуляции -->
+      {% if result %}
+      <div class="fb-card p-4 mt-4">
+        <h2 class="h5 mb-3">📈 Результаты симуляции</h2>
+        
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="text-center p-3 rounded" style="background: rgba(76, 175, 80, 0.1);">
+              <p class="mb-1 text-muted-soft small">Новый доход</p>
+              <p class="h4 text-income mb-0">{{ result.new_income }} ₽</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-center p-3 rounded" style="background: rgba(244, 67, 54, 0.1);">
+              <p class="mb-1 text-muted-soft small">Новый расход</p>
+              <p class="h4 text-expense mb-0">{{ result.new_expense }} ₽</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-center p-3 rounded" style="background: rgba(255, 193, 7, 0.1);">
+              <p class="mb-1 text-muted-soft small">Новый баланс</p>
+              <p class="h4 mb-0">{{ result.new_balance }} ₽</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-success">
+          <h3 class="h6 mb-2">🎯 Прогноз накоплений</h3>
+          <p class="mb-0">За {{ result.months }} месяцев вы накопите: <strong>{{ result.projected_savings }} ₽</strong></p>
+          {% if result.savings_increase_percent > 0 %}
+          <p class="mb-0 small">Это на <strong>{{ result.savings_increase_percent|round(1) }}%</strong> больше, чем сейчас!</p>
+          {% endif %}
+        </div>
+
+        <!-- AI Анализ от DeepSeek -->
+        <div class="alert alert-info">
+          <div class="d-flex align-items-start">
+            <span class="me-3" style="font-size: 2rem;">🤖</span>
+            <div>
+              <h3 class="h6 mb-2">AI-Анализ от DeepSeek</h3>
+              <div class="ai-analysis-text" style="white-space: pre-line;">{{ result.gpt_advice }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.ai-analysis-text {
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+</style>
+{% endblock %}
