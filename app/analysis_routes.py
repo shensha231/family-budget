@@ -113,7 +113,9 @@ def simulator_gpt():
     
     return render_template('analysis/simulator_gpt.html', 
                          categories=categories,
-                         stats=current_stats)
+                         stats=current_stats,
+                         result=None,
+                         changes=None)
 
 
 def get_user_financial_data(user_id):
@@ -143,7 +145,10 @@ def get_user_financial_data(user_id):
             expense_by_category[t.category] += t.amount
     
     # Безопасное деление
-    months_count = max(1, len(set(t.date.strftime('%Y-%m') for t in transactions)) or 1)
+    months_set = set()
+    for t in transactions:
+        months_set.add(t.date.strftime('%Y-%m'))
+    months_count = max(1, len(months_set) or 1)
     
     return {
         'total_income': income_total,
