@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Дашборд · Family Budget{% endblock %}
+
 {% block content %}
 <div class="container py-4">
   <div class="row g-4">
-
+    <!-- СТАТИСТИКА -->
     <div class="col-md-4">
       <div class="fb-card p-4 h-100">
         <h2 class="h6 text-muted-soft mb-3">Текущий месяц</h2>
@@ -17,84 +18,163 @@
       </div>
     </div>
 
+    <!-- ФОРМА ДОБАВЛЕНИЯ + AI -->
     <div class="col-md-8">
+      <!-- БЫСТРЫЕ КАТЕГОРИИ -->
+      <div class="mb-3">
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-cat" data-cat="Продукты">
+            🛒 Продукты
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-cat" data-cat="Кафе">
+            ☕ Кафе
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-cat" data-cat="Транспорт">
+            🚗 Транспорт
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm quick-cat" data-cat="Развлечения">
+            🎬 Развлечения
+          </button>
+        </div>
+      </div>
+
       <div class="fb-card p-4 mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h2 class="h6 mb-0 text-muted-soft">Добавить операцию</h2>
         </div>
-        <form method="post" action="{{ url_for('transactions.add_transaction') }}" class="row g-3">
+
+        <form method="post" action="{{ url_for('transactions.add_transaction') }}" class="row g-3" id="transaction-form">
           <div class="col-md-3">
             <label class="form-label">Тип</label>
-            <select name="type" class="form-select" required>
+            <select name="type" class="form-select" required id="type-select">
+              <option value="expense" selected>Расход</option>
               <option value="income">Доход</option>
-              <option value="expense">Расход</option>
             </select>
           </div>
+
           <div class="col-md-3">
-            <label class="form-label">Сумма</label>
-            <input type="number" step="0.01" name="amount" class="form-control" required>
+            <label class="form-label">Сумма ₽</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required id="amount-input" placeholder="0">
           </div>
+
           <div class="col-md-3">
             <label class="form-label">Категория</label>
-            <input type="text" name="category" class="form-control" placeholder="Еда, жильё..." required>
+            <input type="text" name="category" class="form-control" placeholder="Еда, жильё..." required id="category-input">
           </div>
+
           <div class="col-md-3">
             <label class="form-label">Комментарий</label>
             <input type="text" name="description" class="form-control" placeholder="Необязательно">
           </div>
+
+          <!-- AI ПОДСКАЗКА -->
+          <div class="col-12" id="ai-tip" style="display:none;">
+            <div class="alert alert-info d-flex align-items-start">
+              <span class="me-2">🤖</span>
+              <div id="ai-tip-text"></div>
+            </div>
+          </div>
+
           <div class="col-12">
             <button type="submit" class="btn btn-fb-primary">
-              Сохранить
+              💰 Сохранить
             </button>
           </div>
         </form>
       </div>
 
+      <!-- ПОСЛЕДНИЕ ОПЕРАЦИИ -->
       <div class="fb-card p-4">
         <h2 class="h6 text-muted-soft mb-3">Последние операции</h2>
         {% if last_transactions %}
-          <div class="table-responsive">
-            <table class="table table-dark table-borderless align-middle mb-0">
-              <thead class="text-muted-soft">
-                <tr>
-                  <th>Дата</th>
-                  <th>Тип</th>
-                  <th>Категория</th>
-                  <th>Описание</th>
-                  <th class="text-end">Сумма</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in last_transactions %}
-                  <tr>
-                    <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
-                    <td>
-                      {% if t.type == 'income' %}
-                        <span class="text-income">Доход</span>
-                      {% else %}
-                        <span class="text-expense">Расход</span>
-                      {% endif %}
-                    </td>
-                    <td>{{ t.category }}</td>
-                    <td>{{ t.description or '-' }}</td>
-                    <td class="text-end">
-                      {% if t.type == 'income' %}
-                        <span class="text-income">+{{ t.amount }} ₽</span>
-                      {% else %}
-                        <span class="text-expense">-{{ t.amount }} ₽</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+        <div class="table-responsive">
+          <table class="table table-dark table-borderless align-middle mb-0">
+            <thead class="text-muted-soft">
+              <tr>
+                <th>Дата</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Описание</th>
+                <th class="text-end">Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in last_transactions %}
+              <tr>
+                <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
+                <td>
+                  {% if t.type == 'income' %}
+                  <span class="text-income">Доход</span>
+                  {% else %}
+                  <span class="text-expense">Расход</span>
+                  {% endif %}
+                </td>
+                <td>{{ t.category }}</td>
+                <td>{{ t.description or '-' }}</td>
+                <td class="text-end">
+                  {% if t.type == 'income' %}
+                  <span class="text-income">+{{ t.amount }} ₽</span>
+                  {% else %}
+                  <span class="text-expense">-{{ t.amount }} ₽</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
         {% else %}
-          <p class="mb-0 text-muted-soft">Пока нет ни одной операции.</p>
+        <p class="mb-0 text-muted-soft">Пока нет ни одной операции.</p>
         {% endif %}
       </div>
     </div>
-
   </div>
 </div>
+
+<script>
+// Данные с сервера
+const userMonthlyIncome = {{ total_income or 50000 }};
+
+// Быстрый выбор категории
+document.querySelectorAll('.quick-cat').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.getElementById('category-input').value = this.dataset.cat;
+    document.getElementById('amount-input').focus();
+  });
+});
+
+// AI подсказки при вводе крупной суммы
+let tipTimeout;
+document.getElementById('amount-input').addEventListener('input', function() {
+  clearTimeout(tipTimeout);
+  const amount = parseFloat(this.value);
+  const category = document.getElementById('category-input').value;
+  
+  if (amount > 5000 && category) {
+    tipTimeout = setTimeout(async () => {
+      try {
+        const response = await fetch('/api/get-spending-tip', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            amount: amount, 
+            category: category, 
+            monthly_income: userMonthlyIncome
+          })
+        });
+        
+        const data = await response.json();
+        if (data.tip) {
+          document.getElementById('ai-tip').style.display = 'block';
+          document.getElementById('ai-tip-text').textContent = data.tip;
+        }
+      } catch (e) {
+        console.log('AI tip request failed:', e);
+      }
+    }, 1000);
+  } else {
+    document.getElementById('ai-tip').style.display = 'none';
+  }
+});
+</script>
 {% endblock %}
