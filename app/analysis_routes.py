@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import func
+from datetime import datetime, timedelta
 from .models import Transaction
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
@@ -70,6 +71,122 @@ def stats():
 def simulator_menu():
     # просто страница-меню с выбором формул
     return render_template("analysis/sim_menu.html")
+
+
+# ---------- GPT БЮДЖЕТНЫЙ СИМУЛЯТОР ----------
+
+@analysis_bp.route('/simulator/gpt', methods=['GET', 'POST'])
+@login_required
+def simulator_gpt():
+    """Интерактивный симулятор бюджета с GPT"""
+    from app.ai_service import simulate_budget_changes
+    
+    if request.method == 'POST':
+        # Получаем данные из формы
+        changes = {
+            'reduce_category': request.form.get('category'),
+            'reduce_percent': float(request.form.get('reduce_percent', 0)),
+            'increase_income': float(request.form.get('increase_income', 0)),
+            'new_expense': request.form.get('new_expense'),
+            'simulation_months': int(request.form.get('months', 6))
+        }
+        
+        # Получаем текущие данные пользователя
+        current_data = get_user_financial_data(current_user.id)
+        
+        # GPT анализирует изменения
+        simulation_result = simulate_budget_changes(current_data, changes)
+        
+        # Получаем категории для отображения формы после POST
+        categories = get_expense_categories(current_user.id)
+        current_stats = get_current_month_stats(current_user.id)
+        
+        return render_template('analysis/simulator_gpt.html', 
+                             result=simulation_result,
+                             changes=changes,
+                             categories=categories,
+                             stats=current_stats)
+    
+    # GET - показываем форму
+    categories = get_expense_categories(current_user.id)
+    current_stats = get_current_month_stats(current_user.id)
+    
+    return render_template('analysis/simulator_gpt.html', 
+                         categories=categories,
+                         stats=current_stats)
+
+
+def get_user_financial_data(user_id):
+    """Получает полные финансовые данные пользователя"""
+    # Доходы и расходы за последние 3 месяца
+    three_months_ago = datetime.utcnow() - timedelta(days=90)
+    
+    # Учитываем семейный контекст
+    if current_user.family_id:
+        q = Transaction.query.filter_by(family_id=current_user.family_id)
+    else:
+        q = Transaction.query.filter_by(user_id=user_id)
+    
+    transactions = q.filter(
+        Transaction.date >= three_months_ago
+    ).all()
+    
+    income_total = sum(t.amount for t in transactions if t.type == 'income')
+    expense_total = sum(t.amount for t in transactions if t.type == 'expense')
+    
+    # Группировка расходов по категориям
+    expense_by_category = {}
+    for t in transactions:
+        if t.type == 'expense':
+            if t.category not in expense_by_category:
+                expense_by_category[t.category] = 0
+            expense_by_category[t.category] += t.amount
+    
+    # Безопасное деление
+    months_count = max(1, len(set(t.date.strftime('%Y-%m') for t in transactions)) or 1)
+    
+    return {
+        'total_income': income_total,
+        'total_expense': expense_total,
+        'balance': income_total - expense_total,
+        'expense_by_category': expense_by_category,
+        'avg_monthly_income': income_total / months_count,
+        'avg_monthly_expense': expense_total / months_count,
+        'months_count': months_count
+    }
+
+
+def get_expense_categories(user_id):
+    """Получает список категорий расходов пользователя"""
+    if current_user.family_id:
+        q = Transaction.query.filter_by(family_id=current_user.family_id, type='expense')
+    else:
+        q = Transaction.query.filter_by(user_id=user_id, type='expense')
+    
+    categories = q.with_entities(Transaction.category).distinct().all()
+    return [c[0] for c in categories]
+
+
+def get_current_month_stats(user_id):
+    """Получает статистику за текущий месяц"""
+    now = datetime.utcnow()
+    month_start = datetime(now.year, now.month, 1)
+    
+    if current_user.family_id:
+        q = Transaction.query.filter_by(family_id=current_user.family_id)
+    else:
+        q = Transaction.query.filter_by(user_id=user_id)
+    
+    transactions = q.filter(Transaction.date >= month_start).all()
+    
+    income = sum(t.amount for t in transactions if t.type == 'income')
+    expense = sum(t.amount for t in transactions if t.type == 'expense')
+    
+    return {
+        'income': income,
+        'expense': expense,
+        'balance': income - expense
+    }
 
 
 # ---------- ВКЛАД: ПРОСТЫЕ / СЛОЖНЫЕ ПРОЦЕНТЫ ----------
