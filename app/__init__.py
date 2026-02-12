@@ -53,4 +53,8 @@ def create_app():
             return redirect(url_for("transactions.dashboard"))
         return render_template("index.html")
 
+    # Создание таблиц БД при первом запуске
+    with app.app_context():
+        db.create_all()
+    
     return app
