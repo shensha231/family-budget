@@ -64,6 +64,14 @@
                             Добавьте ещё операций, чтобы получить персональные советы.
                         </p>
                     {% endif %}
+
+                                        <!-- GPT-СОВЕТЫ -->
+                    {% if gpt_advice %}
+                    <div class="alert alert-success mt-4">
+                        <h3 class="h6 mb-2">🤖 AI-советы:</h3>
+                        <div style="white-space: pre-wrap;">{{ gpt_advice }}</div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         {% else %}
