@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
+from app.ai_service import generate_smart_advice  # ← ИМПОРТ ПЕРЕНЕСЕН В НАЧАЛО
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -42,11 +43,20 @@ def smart():
 @login_required
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
-    from app.ai_service import generate_smart_advice
     
     gpt_advice = None
     try:
+        # Получаем данные пользователя
         user_data = get_user_financial_data(current_user.id)
+        
+        # ПРОВЕРКА: есть ли достаточно данных для анализа
+        if not user_data or user_data['total_income'] == 0 and user_data['total_expense'] == 0:
+            return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."})
+        
+        # Проверка на наличие расходов по категориям
+        if not user_data['expense_by_category']:
+            return jsonify({"advice": "💰 Добавьте несколько расходов по разным категориям, чтобы мы могли дать более точные советы."})
+        
         income_summary = f"{user_data['total_income']:.0f} ₽"
         expense_breakdown = "\n".join([f"- {cat}: {amount:.0f} ₽" for cat, amount in user_data['expense_by_category'].items()])
         
@@ -65,10 +75,15 @@ def generate_advice():
             'large_expenses': large_expenses_text
         }
         
-        gpt_advice = generate_smart_advice(user_data_formatted)
+        # Вызов GPT с проверкой наличия данных
+        if user_data['total_income'] > 0 or user_data['total_expense'] > 0:
+            gpt_advice = generate_smart_advice(user_data_formatted)
+        else:
+            gpt_advice = "📝 Добавьте несколько операций, чтобы получить персонализированные финансовые советы."
+            
     except Exception as e:
         print(f"GPT Error: {e}")
-        gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek."
+        gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek или попробуйте позже."
     
     return jsonify({"advice": gpt_advice})
 
@@ -130,6 +145,18 @@ def simulator_gpt():
         # Получаем текущие данные пользователя
         current_data = get_user_financial_data(current_user.id)
         
+        # Проверка наличия данных
+        if not current_data or (current_data['total_income'] == 0 and current_data['total_expense'] == 0):
+            # Возвращаем форму с сообщением об ошибке
+            categories = get_expense_categories(current_user.id)
+            current_stats = get_current_month_stats(current_user.id)
+            return render_template('analysis/simulator_gpt.html', 
+                                 categories=categories,
+                                 stats=current_stats,
+                                 error_message="Добавьте несколько операций для использования симулятора.",
+                                 result=None,
+                                 changes=None)
+        
         # GPT анализирует изменения
         simulation_result = simulate_budget_changes(current_data, changes)
         
@@ -168,6 +195,18 @@ def get_user_financial_data(user_id):
     transactions = q.filter(
         Transaction.date >= three_months_ago
     ).all()
+    
+    # Если нет транзакций, возвращаем базовые значения
+    if not transactions:
+        return {
+            'total_income': 0,
+            'total_expense': 0,
+            'balance': 0,
+            'expense_by_category': {},
+            'avg_monthly_income': 0,
+            'avg_monthly_expense': 0,
+            'months_count': 1
+        }
     
     income_total = sum(t.amount for t in transactions if t.type == 'income')
     expense_total = sum(t.amount for t in transactions if t.type == 'expense')
