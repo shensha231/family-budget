@@ -10,6 +10,7 @@ analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 @analysis_bp.route("/smart")
 @login_required
 def smart():
+        from app.ai_service import generate_smart_advice
     # семейный или личный контекст
     if current_user.family_id:
         q = Transaction.query.filter_by(family_id=current_user.family_id)
@@ -34,7 +35,32 @@ def smart():
         else:
             insights.append(f"Доходы из источника «{cat}»: {total:.2f} ₽.")
 
-    return render_template("analysis/smart.html", rows=rows, insights=insights)
+    # **НОВОЕ: Получаем GPT-советы**
+    gpt_advice = None
+    try:
+                user_data = get_user_financial_data(current_user.id)
+                income_summary = f"{user_data['total_income']:.0f} ₽"
+                expense_breakdown = "\n".join([f"- {cat}: {amount:.0f} ₽" for cat, amount in user_data['expense_by_category'].items()])
+                large_expenses = []
+                for cat, amount in user_data['expense_by_category'].items():
+                                if amount > 10000:
+                                                    large_expenses.append(f"- {cat}: {amount:.0f} ₽")
+                                            large_expenses_text = "\n".join(large_expenses) if large_expenses else "Нет крупных расходов"
+                            user_data_formatted = {
+                                            'income_summary': income_summary,
+                                            'expense_breakdown': expense_breakdown,
+                                            'total_income': user_data['total_income'],
+                                            'total_expense': user_data['total_expense'],
+                                            'balance': user_data['balance'],
+                                            'large_expenses': large_expenses_text
+                                        }
+
+        gpt_advice = generate_smart_advice(user_data_formatted)
+    except Exception as e:
+        print(f"GPT Error: {e}")
+        gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek."
+
+    return render_template("analysis/smart.html", rows=rows, insights=insights, gpt_advice=gpt_advice)
 
 
 @analysis_bp.route("/stats")
