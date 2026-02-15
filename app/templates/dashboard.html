@@ -20,7 +20,7 @@
 
     <!-- ФОРМА ДОБАВЛЕНИЯ + AI -->
     <div class="col-md-8">
-      <!-- КНОПКА СОВЕТОВ -->
+      <!-- КНОПКА ПОЛУЧЕНИЯ СОВЕТОВ -->
       <div class="col-12 mb-3">
         <a href="{{ url_for('analysis.smart') }}" class="btn btn-fb-primary btn-lg w-100" style="font-size: 1.1rem; padding: 1rem;">
           🤖 Получить персональные финансовые советы
@@ -66,7 +66,22 @@
 
           <div class="col-md-3">
             <label class="form-label">Категория</label>
-            <input type="text" name="category" class="form-control" placeholder="Еда, жильё..." required id="category-input">
+            <input type="text" name="category" class="form-control" 
+                   placeholder="Еда, жильё..." required 
+                   id="category-input" list="category-suggestions">
+            <datalist id="category-suggestions">
+                <!-- Популярные категории расходов -->
+                <option value="Продукты">
+                <option value="Кафе и рестораны">
+                <option value="Транспорт">
+                <option value="Жильё">
+                <option value="Связь и интернет">
+                <option value="Одежда">
+                <option value="Развлечения">
+                <option value="Здоровье">
+                <option value="Образование">
+                <option value="Хобби">
+            </datalist>
           </div>
 
           <div class="col-md-3">
@@ -76,9 +91,9 @@
 
           <!-- AI ПОДСКАЗКА -->
           <div class="col-12" id="ai-tip" style="display:none;">
-            <div class="alert alert-info d-flex align-items-start">
-              <span class="me-2">🤖</span>
-              <div id="ai-tip-text"></div>
+            <div class="alert alert-info d-flex align-items-start animate__animated animate__fadeIn">
+                <span class="me-2" style="font-size: 1.5rem;">🤖</span>
+                <div id="ai-tip-text" style="flex: 1;"></div>
             </div>
           </div>
 
@@ -138,6 +153,28 @@
   </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО ДЛЯ AI-СОВЕТОВ -->
+{% if get_flashed_messages(category_filter=['info']) %}
+<div class="modal fade show" id="aiAdviceModal" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">🤖 Персональный совет</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="this.closest('.modal').style.display='none'"></button>
+            </div>
+            <div class="modal-body">
+                {% for message in get_flashed_messages(category_filter=['info']) %}
+                    <p class="mb-0">{{ message }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Понятно</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script>
 // Данные с сервера
 const userMonthlyIncome = {{ total_income or 50000 }};
@@ -182,6 +219,13 @@ document.getElementById('amount-input').addEventListener('input', function() {
   } else {
     document.getElementById('ai-tip').style.display = 'none';
   }
+});
+
+// Анимация при отправке формы
+document.getElementById('transaction-form').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Сохранение...';
 });
 </script>
 {% endblock %}
