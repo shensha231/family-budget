@@ -3,7 +3,6 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
-from app.ai_service import generate_smart_advice  # ← ИМПОРТ ПЕРЕНЕСЕН В НАЧАЛО
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -43,6 +42,7 @@ def smart():
 @login_required
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
+        from app.ai_service import generate_smart_advice
     
     gpt_advice = None
     try:
