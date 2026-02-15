@@ -64,6 +64,22 @@
                             Добавьте ещё операций, чтобы получить персональные советы.
                         </p>
                     {% endif %}
+
+                    <!-- GPT-СОВЕТЫ -->
+                    <div id="gpt-advice-section" class="mt-4">
+                        <button id="get-advice-btn" class="btn btn-fb-primary">
+                            🤖 Получить персональные AI-советы
+                        </button>
+                        
+                        <div id="advice-loading" class="alert alert-info mt-3" style="display: none;">
+                            ⏳ Генерируем персональные советы... Это может занять 10-30 секунд.
+                        </div>
+                        
+                        <div id="advice-result" style="display: none;" class="alert alert-success mt-3">
+                            <h3 class="h6 mb-2">🤖 AI-советы:</h3>
+                            <div id="advice-content" style="white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         {% else %}
@@ -81,4 +97,41 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+document.getElementById('get-advice-btn').addEventListener('click', function() {
+    const btn = this;
+    const loading = document.getElementById('advice-loading');
+    const result = document.getElementById('advice-result');
+    const content = document.getElementById('advice-content');
+    
+    // Скрыть кнопку, показать загрузку
+    btn.style.display = 'none';
+    loading.style.display = 'block';
+    result.style.display = 'none';
+    
+    // Отправить запрос на генерацию советов
+    fetch('/analysis/smart/generate-advice', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Показать результат
+        loading.style.display = 'none';
+        result.style.display = 'block';
+        content.textContent = data.advice;
+    })
+    .catch(error => {
+        // Показать ошибку
+        loading.style.display = 'none';
+        result.style.display = 'block';
+        result.className = 'alert alert-danger mt-3';
+        content.textContent = '❌ Произошла ошибка при получении советов. Попробуйте позже.';
+        console.error('Error:', error);
+    });
+});
+</script>
 {% endblock %}
