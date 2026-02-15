@@ -27,13 +27,15 @@ def create_app():
     Migrate(app, db)
     login_manager.init_app(app)
     
-    # Создание таблиц БД при первом запуске
+
+    # Импорт моделей, чтобы Alembic их видел
+    from .models import User, Family, Transaction  # noqa
+
+        # Создание таблиц БД при первом запуске
     with app.app_context():
         db.create_all()
         print("✅ Таблицы базы данных созданы!")
 
-    # Импорт моделей, чтобы Alembic их видел
-    from .models import User, Family, Transaction  # noqa
 
     # Blueprint'ы
     from .auth_routes import auth_bp
