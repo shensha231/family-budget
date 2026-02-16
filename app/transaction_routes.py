@@ -261,6 +261,7 @@ def statistics():
         category_stats[t.category]['count'] += 1
     
     for cat in category_stats:
+     
         category_stats[cat]['avg'] = category_stats[cat]['total'] / category_stats[cat]['count']
     
     return render_template(
