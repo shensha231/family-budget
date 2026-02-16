@@ -161,6 +161,82 @@
   </div>
 </div>
 
+<!-- Capabilities Section (НОВАЯ СЕКЦИЯ) -->
+<div class="capabilities-section">
+  <div class="container py-5">
+    <div class="section-header text-center mb-5">
+      <h2 class="section-title mb-3">Что может Family Budget?</h2>
+      <p class="section-subtitle text-muted-soft">Полный набор инструментов для контроля финансов семьи</p>
+    </div>
+    
+    <div class="row g-4">
+      <!-- Capability 1: Smart Dashboard -->
+      <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('transactions.dashboard') }}" class="capability-card">
+          <div class="capability-icon-wrapper">
+            <i class="bi bi-speedometer2 capability-icon"></i>
+          </div>
+          <h4 class="capability-title">Дашборд</h4>
+          <p class="capability-desc">
+            Все транзакции, графики и аналитика в одном месте
+          </p>
+          <div class="capability-link">
+            Перейти <i class="bi bi-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+      
+      <!-- Capability 2: AI Analysis -->
+      <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('analysis.smart') }}" class="capability-card">
+          <div class="capability-icon-wrapper">
+            <i class="bi bi-stars capability-icon"></i>
+          </div>
+          <h4 class="capability-title">AI-анализ</h4>
+          <p class="capability-desc">
+            Персональные советы от искусственного интеллекта
+          </p>
+          <div class="capability-link">
+            Попробовать <i class="bi bi-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+      
+      <!-- Capability 3: Simulator -->
+      <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('analysis.simulator_menu') }}" class="capability-card">
+          <div class="capability-icon-wrapper">
+            <i class="bi bi-calculator capability-icon"></i>
+          </div>
+          <h4 class="capability-title">Симулятор</h4>
+          <p class="capability-desc">
+            Планируйте будущее и симулируйте сценарии
+          </p>
+          <div class="capability-link">
+            Запустить <i class="bi bi-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+      
+      <!-- Capability 4: Projects -->
+      <div class="col-md-6 col-lg-3">
+        <a href="{{ url_for('analysis.project') }}" class="capability-card">
+          <div class="capability-icon-wrapper">
+            <i class="bi bi-clipboard-data capability-icon"></i>
+          </div>
+          <h4 class="capability-title">Инвестиции</h4>
+          <p class="capability-desc">
+            Оцените проекты с расчётом NPV и IRR
+          </p>
+          <div class="capability-link">
+            Рассчитать <i class="bi bi-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CTA Section -->
 <div class="cta-section">
   <div class="container py-5">
@@ -403,6 +479,195 @@
     align-self: flex-start;
   }
   
+  /* ========== УЛУЧШЕННЫЕ АНИМАЦИИ ПРИ НАВЕДЕНИИ ========== */
+  
+  .feature-card {
+    cursor: pointer;
+    position: relative;
+    overflow: visible !important;
+  }
+  
+  /* Эффект свечения при наведении */
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, var(--fb-gold), var(--fb-gold-strong), #14b8a6);
+    border-radius: 1.25rem;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.4s ease;
+    filter: blur(15px);
+  }
+  
+  .feature-card:hover::after {
+    opacity: 0.6;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+  }
+  
+  /* Поворот иконки при наведении */
+  .feature-card:hover .feature-icon {
+    animation: rotateIcon 0.6s ease-in-out;
+    transform: scale(1.1);
+  }
+  
+  @keyframes rotateIcon {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(10deg) scale(1.15); }
+    100% { transform: rotate(0deg) scale(1.1); }
+  }
+  
+  /* Эффект поднятия и тени */
+  .feature-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+      0 20px 60px rgba(251, 191, 36, 0.3),
+      0 0 40px rgba(251, 191, 36, 0.2);
+  }
+  
+  /* Анимация тега */
+  .feature-card:hover .feature-tag {
+    background: var(--fb-gold);
+    color: #020617;
+    transform: scale(1.05);
+  }
+  
+  .feature-tag {
+    transition: all 0.3s ease;
+  }
+  
+  /* ========== НОВАЯ СЕКЦИЯ: Capabilities ========== */
+  
+  .capabilities-section {
+    padding: 4rem 0;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.08) 0%, transparent 50%);
+  }
+  
+  .capability-card {
+    padding: 2.5rem 2rem;
+    background:
+      radial-gradient(circle at top left, rgba(248, 250, 252, 0.05), transparent 55%),
+      var(--fb-bg-soft);
+    border: 2px solid var(--fb-border-soft);
+    border-radius: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Эффект волны при наведении */
+  .capability-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.2), transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+  
+  .capability-card:hover::before {
+    width: 400px;
+    height: 400px;
+  }
+  
+  .capability-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    border-color: var(--fb-gold);
+    box-shadow:
+      0 25px 70px rgba(0, 0, 0, 0.5),
+      0 0 50px rgba(251, 191, 36, 0.3);
+  }
+  
+  .capability-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: all 0.4s ease;
+  }
+  
+  .capability-card:hover .capability-icon-wrapper {
+    transform: rotate(5deg) scale(1.1);
+    background: linear-gradient(135deg, var(--fb-gold), var(--fb-gold-strong));
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.5);
+  }
+  
+  .capability-icon {
+    font-size: 2.5rem;
+    color: var(--fb-gold);
+    transition: all 0.4s ease;
+  }
+  
+  .capability-card:hover .capability-icon {
+    color: #020617;
+    transform: scale(1.15);
+  }
+  
+  .capability-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--fb-text-main);
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+  }
+  
+  .capability-card:hover .capability-title {
+    color: var(--fb-gold);
+  }
+  
+  .capability-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--fb-text-muted);
+    margin-bottom: 1.5rem;
+  }
+  
+  .capability-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fb-gold);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: gap 0.3s ease;
+  }
+  
+  .capability-card:hover .capability-link {
+    gap: 0.8rem;
+  }
+  
+  /* Эффект появления при скролле */
+  .capability-card {
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .capability-card:nth-child(1) { animation-delay: 0.1s; }
+  .capability-card:nth-child(2) { animation-delay: 0.2s; }
+  .capability-card:nth-child(3) { animation-delay: 0.3s; }
+  .capability-card:nth-child(4) { animation-delay: 0.4s; }
+  
   /* ========== CTA Section ========== */
   .cta-section {
     padding: 4rem 0;
@@ -448,6 +713,23 @@
     
     .feature-card {
       padding: 1.5rem;
+    }
+    
+    .capability-card {
+      padding: 2rem 1.5rem;
+    }
+    
+    .capability-icon-wrapper {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .capability-icon {
+      font-size: 2rem;
+    }
+    
+    .capability-title {
+      font-size: 1.3rem;
     }
   }
 </style>
