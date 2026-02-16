@@ -32,6 +32,7 @@ def create_app():
     from .models import User, Family, Transaction  # noqa
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         # Создание таблиц БД при первом запуске
     with app.app_context():
         db.create_all()
@@ -39,6 +40,8 @@ def create_app():
 
 =======
 >>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+=======
+>>>>>>> feature/update
 
     # Blueprint'ы
     from .auth_routes import auth_bp

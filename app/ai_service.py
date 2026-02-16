@@ -1,12 +1,20 @@
 import os
 <<<<<<< HEAD
+<<<<<<< HEAD
 from huggingface_hub import InferenceClient
 from datetime import datetime
+=======
+from openai import OpenAI
+# (возможно другие импорты)
+>>>>>>> feature/update
 
-# Hugging Face API токен
-api_key = "***REMOVED***"
+# Загружаем токен из переменной окружения
+API_TOKEN = os.getenv('HF_TOKEN', '')
 
-client = InferenceClient(token=api_key)
+client = OpenAI(
+    base_url="...",
+    api_key=API_TOKEN
+)
 
 print(f"✅ Hugging Face подключен: {api_key[:10]}...")
 =======
