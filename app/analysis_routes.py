@@ -42,11 +42,7 @@ def smart():
 @login_required
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
-<<<<<<< HEAD
     from app.ai_service import generate_smart_advice  # ← ИСПРАВЛЕНО: 4 пробела вместо 8
-=======
-        from app.ai_service import generate_smart_advice
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
     
     gpt_advice = None
     try:
