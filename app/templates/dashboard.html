@@ -3,6 +3,34 @@
 
 {% block content %}
 <div class="container py-4">
+  
+  <!-- ========== ГРАФИКИ ========== -->
+  <div class="row mb-4">
+    <div class="col-md-6 mb-4">
+      <div class="fb-card p-4">
+        <h5 class="mb-3">
+          <i class="bi bi-pie-chart text-warning me-2"></i>
+          Доходы vs Расходы
+        </h5>
+        <div class="chart-container" style="position: relative; height: 300px;">
+          <canvas id="incomeExpenseChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+      <div class="fb-card p-4">
+        <h5 class="mb-3">
+          <i class="bi bi-bar-chart text-warning me-2"></i>
+          Расходы по категориям
+        </h5>
+        <div class="chart-container" style="position: relative; height: 300px;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <div class="row g-4">
     <!-- СТАТИСТИКА -->
     <div class="col-md-4">
@@ -109,41 +137,34 @@
       <div class="fb-card p-4">
         <h2 class="h6 text-muted-soft mb-3">Последние операции</h2>
         {% if last_transactions %}
-        <div class="table-responsive">
-          <table class="table table-dark table-borderless align-middle mb-0">
-            <thead class="text-muted-soft">
-              <tr>
-                <th>Дата</th>
-                <th>Тип</th>
-                <th>Категория</th>
-                <th>Описание</th>
-                <th class="text-end">Сумма</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in last_transactions %}
-              <tr>
-                <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
-                <td>
+        <div class="transaction-list">
+          {% for t in last_transactions %}
+          <div class="transaction-item d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
+            <div class="d-flex align-items-center gap-3">
+              <div>
+                <small class="text-muted-soft">{{ t.date.strftime('%d.%m.%Y') }}</small>
+                <div>
                   {% if t.type == 'income' %}
-                  <span class="text-income">Доход</span>
+                  <span class="badge bg-success">Доход</span>
                   {% else %}
-                  <span class="text-expense">Расход</span>
+                  <span class="badge bg-danger">Расход</span>
                   {% endif %}
-                </td>
-                <td>{{ t.category }}</td>
-                <td>{{ t.description or '-' }}</td>
-                <td class="text-end">
-                  {% if t.type == 'income' %}
-                  <span class="text-income">+{{ t.amount }} ₽</span>
-                  {% else %}
-                  <span class="text-expense">-{{ t.amount }} ₽</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                  <span class="ms-2">{{ t.category }}</span>
+                </div>
+                {% if t.description %}
+                <small class="text-muted-soft">{{ t.description }}</small>
+                {% endif %}
+              </div>
+            </div>
+            <div class="text-end">
+              {% if t.type == 'income' %}
+              <span class="text-income fw-bold">+{{ t.amount }} ₽</span>
+              {% else %}
+              <span class="text-expense fw-bold">-{{ t.amount }} ₽</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
         </div>
         {% else %}
         <p class="mb-0 text-muted-soft">Пока нет ни одной операции.</p>
@@ -227,5 +248,165 @@ document.getElementById('transaction-form').addEventListener('submit', function(
     submitBtn.disabled = true;
     submitBtn.innerHTML = '⏳ Сохранение...';
 });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ========== ГРАФИК 1: ДОХОДЫ VS РАСХОДЫ ==========
+const incomeExpenseCtx = document.getElementById('incomeExpenseChart');
+if (incomeExpenseCtx) {
+    // Получаем данные из Jinja2
+    const totalIncome = {{ total_income | default(0) }};
+    const totalExpense = {{ total_expense | default(0) }};
+    
+    new Chart(incomeExpenseCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Доходы', 'Расходы'],
+            datasets: [{
+                data: [totalIncome, totalExpense],
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',   // Зелёный для доходов
+                    'rgba(249, 115, 115, 0.8)'  // Красный для расходов
+                ],
+                borderColor: [
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(249, 115, 115, 1)'
+                ],
+                borderWidth: 2,
+                hoverOffset: 20
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#f9fafb',
+                        font: { size: 14 },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    titleColor: '#fbbf24',
+                    bodyColor: '#f9fafb',
+                    borderColor: '#fbbf24',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let value = context.parsed || 0;
+                            return label + ': ' + value.toFixed(2) + ' ₽';
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+}
+
+// ========== ГРАФИК 2: РАСХОДЫ ПО КАТЕГОРИЯМ ==========
+const categoryCtx = document.getElementById('categoryChart');
+if (categoryCtx) {
+    // Получаем данные расходов по категориям из Flask
+    const expenseData = {{ expense_by_category | tojson | safe }};
+    
+    // Преобразуем объект в массивы
+    const categories = Object.keys(expenseData || {});
+    const amounts = Object.values(expenseData || {});
+    
+    // Генерируем красивые цвета для каждой категории
+    const colors = [
+        'rgba(251, 191, 36, 0.8)',   // Золотой
+        'rgba(249, 115, 115, 0.8)',  // Красный
+        'rgba(96, 165, 250, 0.8)',   // Синий
+        'rgba(167, 139, 250, 0.8)',  // Фиолетовый
+        'rgba(52, 211, 153, 0.8)',   // Бирюзовый
+        'rgba(248, 113, 113, 0.8)',  // Коралловый
+        'rgba(253, 224, 71, 0.8)',   // Жёлтый
+        'rgba(156, 163, 175, 0.8)'   // Серый
+    ];
+    
+    new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'Расходы (₽)',
+                data: amounts,
+                backgroundColor: colors.slice(0, categories.length),
+                borderColor: colors.slice(0, categories.length).map(c => c.replace('0.8', '1')),
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    titleColor: '#fbbf24',
+                    bodyColor: '#f9fafb',
+                    borderColor: '#fbbf24',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toFixed(2) + ' ₽';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#9ca3af',
+                        font: { size: 12 },
+                        callback: function(value) {
+                            return value.toFixed(0) + ' ₽';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.1)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#9ca3af',
+                        font: { size: 12 },
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+}
 </script>
 {% endblock %}
