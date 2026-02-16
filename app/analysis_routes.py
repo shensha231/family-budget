@@ -45,10 +45,8 @@ def smart():
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
 
-    from app.ai_service import generate_smart_advice  # ← ИСПРАВЛЕНО: 4 пробела вместо 8
 
-        from app.ai_service import generate_smart_advice
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+    608
     
     gpt_advice = None
     try:
@@ -606,6 +604,4 @@ def costs():
 
 
     return render_template("analysis/costs.html", result=result)
-
-    return render_template("analysis/costs.html", result=result)
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+48
