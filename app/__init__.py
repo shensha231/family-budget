@@ -7,7 +7,6 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
@@ -27,28 +26,15 @@ def create_app():
     Migrate(app, db)
     login_manager.init_app(app)
     
-
     # Импорт моделей, чтобы Alembic их видел
     from .models import User, Family, Transaction  # noqa
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-        # Создание таблиц БД при первом запуске
-    with app.app_context():
-        db.create_all()
-        print("✅ Таблицы базы данных созданы!")
-
-=======
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
-=======
->>>>>>> feature/update
 
     # Blueprint'ы
     from .auth_routes import auth_bp
     from .family_routes import family_bp
     from .transaction_routes import transaction_bp
     from .analysis_routes import analysis_bp
-
+    
     app.register_blueprint(auth_bp)
     app.register_blueprint(family_bp)
     app.register_blueprint(transaction_bp)
