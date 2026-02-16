@@ -55,6 +55,7 @@ def dashboard():
          .limit(10)
          .all()
     )
+<<<<<<< HEAD
     
     # Группируем расходы по категориям для графика (из всех транзакций, не только последних)
     expense_by_category = {}
@@ -71,13 +72,18 @@ def dashboard():
         if t.category not in expense_by_category:
             expense_by_category[t.category] = 0
         expense_by_category[t.category] += t.amount
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
 
     return render_template(
         "dashboard.html",
         total_income=total_income,
         total_expense=total_expense,
         last_transactions=last_transactions,
+<<<<<<< HEAD
         expense_by_category=expense_by_category  # ← ВАЖНО: передаём данные для графика
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
     )
 
 
@@ -111,6 +117,7 @@ def add_transaction():
         if advice:
             flash(f"💡 {advice}", "info")
     
+<<<<<<< HEAD
     return redirect(url_for("transactions.dashboard"))
 
 
@@ -262,3 +269,6 @@ def statistics():
         category_stats=category_stats,
         current_year=current_year
     )
+=======
+    return redirect(url_for("transactions.dashboard"))
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f

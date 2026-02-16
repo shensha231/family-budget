@@ -31,11 +31,14 @@ def create_app():
     # Импорт моделей, чтобы Alembic их видел
     from .models import User, Family, Transaction  # noqa
 
+<<<<<<< HEAD
         # Создание таблиц БД при первом запуске
     with app.app_context():
         db.create_all()
         print("✅ Таблицы базы данных созданы!")
 
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
 
     # Blueprint'ы
     from .auth_routes import auth_bp

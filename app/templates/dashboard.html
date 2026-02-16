@@ -3,6 +3,7 @@
 
 {% block content %}
 <div class="container py-4">
+<<<<<<< HEAD
   
   <!-- ========== ГРАФИКИ ========== -->
   <div class="row mb-4">
@@ -31,6 +32,8 @@
     </div>
   </div>
   
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
   <div class="row g-4">
     <!-- СТАТИСТИКА -->
     <div class="col-md-4">
@@ -137,6 +140,7 @@
       <div class="fb-card p-4">
         <h2 class="h6 text-muted-soft mb-3">Последние операции</h2>
         {% if last_transactions %}
+<<<<<<< HEAD
         <div class="transaction-list">
           {% for t in last_transactions %}
           <div class="transaction-item d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
@@ -165,6 +169,43 @@
             </div>
           </div>
           {% endfor %}
+=======
+        <div class="table-responsive">
+          <table class="table table-dark table-borderless align-middle mb-0">
+            <thead class="text-muted-soft">
+              <tr>
+                <th>Дата</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Описание</th>
+                <th class="text-end">Сумма</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in last_transactions %}
+              <tr>
+                <td>{{ t.date.strftime('%d.%m.%Y') }}</td>
+                <td>
+                  {% if t.type == 'income' %}
+                  <span class="text-income">Доход</span>
+                  {% else %}
+                  <span class="text-expense">Расход</span>
+                  {% endif %}
+                </td>
+                <td>{{ t.category }}</td>
+                <td>{{ t.description or '-' }}</td>
+                <td class="text-end">
+                  {% if t.type == 'income' %}
+                  <span class="text-income">+{{ t.amount }} ₽</span>
+                  {% else %}
+                  <span class="text-expense">-{{ t.amount }} ₽</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
         </div>
         {% else %}
         <p class="mb-0 text-muted-soft">Пока нет ни одной операции.</p>
@@ -249,6 +290,7 @@ document.getElementById('transaction-form').addEventListener('submit', function(
     submitBtn.innerHTML = '⏳ Сохранение...';
 });
 </script>
+<<<<<<< HEAD
 {% endblock %}
 
 {% block extra_js %}
@@ -409,4 +451,6 @@ if (categoryCtx) {
     });
 }
 </script>
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
 {% endblock %}

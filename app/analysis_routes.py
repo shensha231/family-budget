@@ -3,7 +3,10 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
+<<<<<<< HEAD
 from app.ai_service import generate_smart_advice  # ← ИМПОРТ ПЕРЕНЕСЕН В НАЧАЛО
+=======
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -43,7 +46,11 @@ def smart():
 @login_required
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
+<<<<<<< HEAD
     from app.ai_service import generate_smart_advice  # ← ИСПРАВЛЕНО: 4 пробела вместо 8
+=======
+        from app.ai_service import generate_smart_advice
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
     
     gpt_advice = None
     try:
@@ -599,4 +606,8 @@ def costs():
                 "q": q_res,
             }
 
+<<<<<<< HEAD
     return render_template("analysis/costs.html", result=result)
+=======
+    return render_template("analysis/costs.html", result=result)
+>>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
