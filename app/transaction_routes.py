@@ -82,6 +82,7 @@ def dashboard():
         last_transactions=last_transactions,
 
         expense_by_category=expense_by_category  # ← ВАЖНО: передаём данные для графика
+            )
 
     
 
