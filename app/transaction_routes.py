@@ -271,6 +271,5 @@ def statistics():
         category_stats=category_stats,
         current_year=current_year
     )
-=======
     return redirect(url_for("transactions.dashboard"))
 
