@@ -188,7 +188,6 @@ def simulate_budget_changes(current_data, changes):
     reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
     
 
-        savings_increase_percent = 100  # Было 0, стало положительное
     
     # Формируем информацию о категории для промпта
     category_info = f"{category}" if category else "не выбрана"
