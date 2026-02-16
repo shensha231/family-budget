@@ -73,18 +73,17 @@ def dashboard():
             expense_by_category[t.category] = 0
         expense_by_category[t.category] += t.amount
 =======
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
 
     return render_template(
         "dashboard.html",
         total_income=total_income,
         total_expense=total_expense,
         last_transactions=last_transactions,
-<<<<<<< HEAD
+
         expense_by_category=expense_by_category  # ← ВАЖНО: передаём данные для графика
 =======
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
-    )
+    
 
 
 @transaction_bp.route("/add", methods=["POST"])
@@ -262,6 +261,7 @@ def statistics():
     
     for cat in category_stats:
      
+     
         category_stats[cat]['avg'] = category_stats[cat]['total'] / category_stats[cat]['count']
     
     return render_template(
@@ -272,4 +272,4 @@ def statistics():
     )
 =======
     return redirect(url_for("transactions.dashboard"))
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
