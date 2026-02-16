@@ -9,7 +9,7 @@ client = OpenAI(
     base_url="...",
     api_key=API_TOKEN
 )
-print(f"✅ Hugging Face подключен: {api_key[:10]}...")
+print(f"✅ Hugging Face подключен: {API_TOKEN[:10]}...")
 
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
