@@ -79,7 +79,7 @@ def generate_smart_advice(user_data):
         return response.choices[0].message.content
     except Exception as e:
         return f"Ошибка генерации советов: {str(e)}"
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
 
 
 def analyze_transaction(transaction_data):
@@ -129,7 +129,7 @@ def analyze_transaction(transaction_data):
             temperature=0.7,
             max_tokens=150
         )
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
         return response.choices[0].message.content
     except:
         return None
@@ -141,7 +141,7 @@ def simulate_budget_changes(current_data, changes):
     Симулирует изменения бюджета с помощью AI
 
     Симулирует изменения бюджета с помощью GPT
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
     """
     # Рассчитываем новые показатели
     new_income = current_data['avg_monthly_income'] + changes.get('increase_income', 0)
@@ -158,7 +158,7 @@ def simulate_budget_changes(current_data, changes):
 
 
         # Нормализуем категорийные расходы к месячным (делим на количество месяцев)
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
         months_count = current_data.get('months_count', 1)
         monthly_category_expense = category_expense / months_count
         reduction_amount = monthly_category_expense * (reduce_percent / 100)
@@ -176,7 +176,7 @@ def simulate_budget_changes(current_data, changes):
     current_balance = current_data.get('balance', 0)
     
     # Расчет процентного изменения
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
     savings_increase_percent = 0
     if current_balance != 0:
         savings_increase_percent = ((new_balance - current_balance) / abs(current_balance)) * 100
@@ -195,7 +195,7 @@ def simulate_budget_changes(current_data, changes):
     reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
     
     # Детализация экономии
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
     if reduction_amount > 0 and category:
         monthly_saving = reduction_amount
         yearly_saving = monthly_saving * 12
@@ -206,7 +206,7 @@ def simulate_budget_changes(current_data, changes):
 
 
     # GPT анализ с усилением для ресторанов
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
     prompt = f"""
 Проанализируй финансовую симуляцию:
 
@@ -281,7 +281,7 @@ def simulate_budget_changes(current_data, changes):
         gpt_advice = response.choices[0].message.content
     except Exception as e:
         gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже или проверьте API-ключ."
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
     
     return {
         'current_income': current_data['avg_monthly_income'],
@@ -343,4 +343,4 @@ def analyze_financial_health(user_data):
         return response.choices[0].message.content
     except:
         return "Анализ временно недоступен"
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
+
