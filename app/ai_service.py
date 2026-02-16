@@ -1,33 +1,20 @@
 import os
-<<<<<<< HEAD
-<<<<<<< HEAD
+from openai import OpenAI
 from huggingface_hub import InferenceClient
 from datetime import datetime
-=======
-from openai import OpenAI
 # (возможно другие импорты)
->>>>>>> feature/update
-
 # Загружаем токен из переменной окружения
 API_TOKEN = os.getenv('HF_TOKEN', '')
-
 client = OpenAI(
     base_url="...",
     api_key=API_TOKEN
 )
-
 print(f"✅ Hugging Face подключен: {api_key[:10]}...")
-=======
-from openai import OpenAI
-from datetime import datetime
 
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
 )
->>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
-
-
 def generate_smart_advice(user_data):
     """
     Генерирует персонализированные советы на основе полных данных пользователя
@@ -62,7 +49,7 @@ def generate_smart_advice(user_data):
 """
     
     try:
-<<<<<<< HEAD
+
         messages = [
             {"role": "system", "content": "Ты опытный финансовый консультант, который дает практичные советы с юмором и конкретными примерами."},
             {"role": "user", "content": prompt}
@@ -79,7 +66,7 @@ def generate_smart_advice(user_data):
     except Exception as e:
         print(f"Ошибка Hugging Face: {e}")
         return f"❌ Ошибка генерации советов: {str(e)}"
-=======
+
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
@@ -125,7 +112,7 @@ def analyze_transaction(transaction_data):
 """
     
     try:
-<<<<<<< HEAD
+
         messages = [{"role": "user", "content": prompt}]
         
         response = client.chat_completion(
@@ -135,7 +122,7 @@ def analyze_transaction(transaction_data):
             temperature=0.7
         )
         
-=======
+
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
@@ -150,9 +137,9 @@ def analyze_transaction(transaction_data):
 
 def simulate_budget_changes(current_data, changes):
     """
-<<<<<<< HEAD
+
     Симулирует изменения бюджета с помощью AI
-=======
+
     Симулирует изменения бюджета с помощью GPT
 >>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
     """
@@ -168,8 +155,8 @@ def simulate_budget_changes(current_data, changes):
     
     if category and category in current_data['expense_by_category']:
         category_expense = current_data['expense_by_category'][category]
-<<<<<<< HEAD
-=======
+
+
         # Нормализуем категорийные расходы к месячным (делим на количество месяцев)
 >>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
         months_count = current_data.get('months_count', 1)
@@ -181,10 +168,10 @@ def simulate_budget_changes(current_data, changes):
     months = changes.get('simulation_months', 6)
     projected_savings = new_balance * months
     
-<<<<<<< HEAD
+
     current_balance = current_data.get('balance', 0)
     
-=======
+
     # Текущий баланс (может быть отрицательным)
     current_balance = current_data.get('balance', 0)
     
@@ -194,13 +181,13 @@ def simulate_budget_changes(current_data, changes):
     if current_balance != 0:
         savings_increase_percent = ((new_balance - current_balance) / abs(current_balance)) * 100
     elif new_balance > 0:
-<<<<<<< HEAD
+
         savings_increase_percent = 100
     
     category_info = f"{category}" if category else "не выбрана"
     reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
     
-=======
+
         savings_increase_percent = 100  # Было 0, стало положительное
     
     # Формируем информацию о категории для промпта
@@ -216,8 +203,8 @@ def simulate_budget_changes(current_data, changes):
     else:
         saving_details = "📉 Сокращение расходов не запланировано"
     
-<<<<<<< HEAD
-=======
+
+
     # GPT анализ с усилением для ресторанов
 >>>>>>> 86e1b5366313f5eb2c1c708d8c6a1d9e73968a3f
     prompt = f"""
@@ -249,7 +236,7 @@ def simulate_budget_changes(current_data, changes):
 4. РИСКИ: Укажи возможные препятствия и как их избежать.
 5. МОТИВАЦИЯ: Напиши короткое вдохновляющее резюме.
 
-<<<<<<< HEAD
+
 Отвечай на русском языке. Используй эмодзи и четкую структуру.
 """
     
@@ -270,7 +257,7 @@ def simulate_budget_changes(current_data, changes):
     except Exception as e:
         print(f"Ошибка Hugging Face: {e}")
         gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже."
-=======
+
 Если сокращается категория, связанная с едой вне дома (например, «Рестораны», «Кафе», «Еда вне дома», «Доставка еды»):
 - Объясни, почему такая статья расходов может быть завышенной при данных доходах.
 - Предложи 2–3 идеи вкусных домашних ужинов или простых рецептов (без точной граммовки и длинных инструкций),
@@ -330,7 +317,7 @@ def analyze_financial_health(user_data):
 3. Потенциал для инвестиций
 4. 3 главные цели на ближайший год
 """
-<<<<<<< HEAD
+
     
     try:
         messages = [{"role": "user", "content": prompt}]
@@ -345,7 +332,7 @@ def analyze_financial_health(user_data):
         return response.choices[0].message.content
     except:
         return "Анализ временно недоступен"
-=======
+
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
