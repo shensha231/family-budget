@@ -56,6 +56,7 @@ flask-assets==2.1.0
 cssmin==0.2.0
 jsmin==3.0.1
 Pillow==10.2.0
+huggingface_hub
 
 
 
