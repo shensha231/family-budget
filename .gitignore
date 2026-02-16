@@ -1,1 +1,5 @@
-"app.db" 
+.env
+__pycache__/
+*.pyc
+passwords.txt 
+passwords.txt 
