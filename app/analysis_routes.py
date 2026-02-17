@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
-from app.ai_service import generate_smart_advice
+# from app.ai_service import generate_smart_advice
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -47,9 +47,7 @@ def generate_advice():
 
     608
     
-    gpt_advice = None
-    try:
-        # Получаем данные пользователя
+    gpt_advice = "AI советы временно недоступны"
         user_data = get_user_financial_data(current_user.id)
         
             return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."})
@@ -79,12 +77,12 @@ def generate_advice():
         # Вызов GPT с проверкой наличия данных
         if user_data['total_income'] > 0 or user_data['total_expense'] > 0:
             gpt_advice = generate_smart_advice(user_data_formatted)
-        else:
-            gpt_advice = "📝 Добавьте несколько операций, чтобы получить персонализированные финансовые советы."
-            
-    except Exception as e:
-        print(f"GPT Error: {e}")
-        gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek или попробуйте позже."
+#         else:
+            # gpt_advice = "📝 Добавьте несколько операций, чтобы получить персонализированные финансовые советы."
+#             
+    # # except Exception as e:
+        # print(f"GPT Error: {e}")
+        # gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek или попробуйте позже."
     
     return jsonify({"advice": gpt_advice})
 
