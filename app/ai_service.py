@@ -12,8 +12,8 @@ client = OpenAI(
 print(f"✅ Hugging Face подключен: {API_TOKEN[:10]}...")
 
 client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com"
+        api_key=API_TOKEN,
+        base_url="https://api-inference.huggingface.co/v1/"
 )
 def generate_smart_advice(user_data):
     """
