@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
-
+from app.ai_service import generate_smart_advice
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
 
