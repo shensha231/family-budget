@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
-
+from app.ai_service import generate_smart_advice
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -49,12 +49,9 @@ def generate_advice():
     
     gpt_advice = None
     try:
-                from app.ai_service import generate_smart_advice  # Lazy import
         # Получаем данные пользователя
         user_data = get_user_financial_data(current_user.id)
         
-        # ПРОВЕРКА: есть ли достаточно данных для анализа
-        if not user_data or user_data['total_income'] == 0 and user_data['total_expense'] == 0:
             return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."})
         
         # Проверка на наличие расходов по категориям
