@@ -40,10 +40,7 @@ def smart():
 
 @analysis_bp.route("/smart/generate-advice", methods=["POST"])
 @login_required
-41
-41
-():
-    """Отдельный endpoint для генерации GPT-советов"""
+def generate_advice():    """Отдельный endpoint для генерации GPT-советов"""
 
 
     608
