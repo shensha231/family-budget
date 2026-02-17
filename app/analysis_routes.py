@@ -3,7 +3,6 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
-# from app.ai_service import generate_smart_advice
 
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
@@ -41,7 +40,9 @@ def smart():
 
 @analysis_bp.route("/smart/generate-advice", methods=["POST"])
 @login_required
-def generate_advice():
+41
+41
+():
     """Отдельный endpoint для генерации GPT-советов"""
 
 
