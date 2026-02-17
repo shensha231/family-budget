@@ -46,10 +46,10 @@ def generate_advice():
 
 
     608
-        from app.ai_service import generate_smart_advice  # Lazy import
     
     gpt_advice = None
     try:
+                from app.ai_service import generate_smart_advice  # Lazy import
         # Получаем данные пользователя
         user_data = get_user_financial_data(current_user.id)
         
