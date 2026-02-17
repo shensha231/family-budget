@@ -1,20 +1,23 @@
 import os
-from openai import OpenAI
 from huggingface_hub import InferenceClient
 from datetime import datetime
 # (возможно другие импорты)
 # Загружаем токен из переменной окружения
-API_TOKEN = os.getenv('HF_TOKEN', '')
-client = OpenAI(
-    base_url="...",
-    api_key=API_TOKEN
-)
-print(f"✅ Hugging Face подключен: {API_TOKEN[:10]}...")
+# Глобальная переменная для кэширования клиента
+_client_cache = None
 
-client = OpenAI(
-        api_key=API_TOKEN,
-        base_url="https://api-inference.huggingface.co/v1/"
-)
+def get_ai_client():
+    """Ленивая инициализация OpenAI клиента (создаётся только при первом вызове)"""
+        from openai import OpenAI
+    global _client_cache
+    if _client_cache is None:
+        API_TOKEN = os.getenv('HF_TOKEN', '')
+        _client_cache = OpenAI(
+            base_url="https://api-inference.huggingface.co/v1/",
+            api_key=API_TOKEN
+        )
+    return _client_cache
+
 def generate_smart_advice(user_data):
     """
     Генерирует персонализированные советы на основе полных данных пользователя
