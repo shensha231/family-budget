@@ -40,7 +40,8 @@ def smart():
 
 @analysis_bp.route("/smart/generate-advice", methods=["POST"])
 @login_required
-def generate_advice():    """Отдельный endpoint для генерации GPT-советов"""
+def generate_advice():
+    """Отдельный endpoint для генерации GPT-советов"""
     gpt_advice = "AI советы временно недоступны"
         user_data = get_user_financial_data(current_user.id)
         
