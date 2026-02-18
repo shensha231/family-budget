@@ -48,7 +48,6 @@ def generate_advice():    """Отдельный endpoint для генераци
         user_data = get_user_financial_data(current_user.id)
         
             return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."})
-        
         # Проверка на наличие расходов по категориям
         if not user_data['expense_by_category']:
             return jsonify({"advice": "💰 Добавьте несколько расходов по разным категориям, чтобы мы могли дать более точные советы."})
