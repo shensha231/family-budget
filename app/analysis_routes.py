@@ -43,7 +43,6 @@ def smart():
 def generate_advice():    """Отдельный endpoint для генерации GPT-советов"""
 
 
-    608
     
     gpt_advice = "AI советы временно недоступны"
         user_data = get_user_financial_data(current_user.id)
