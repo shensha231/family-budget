@@ -4,6 +4,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from .models import Transaction
 from app.ai_service import generate_smart_advice
+
 analysis_bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
 
@@ -43,9 +44,15 @@ def smart():
 def generate_advice():
     """Отдельный endpoint для генерации GPT-советов"""
     gpt_advice = "AI советы временно недоступны"
+    
+    try:
         user_data = get_user_financial_data(current_user.id)
         
-            return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."}# Проверка на наличие расходов по категориям
+        # Проверка наличия данных
+        if not user_data or (user_data['total_income'] == 0 and user_data['total_expense'] == 0):
+            return jsonify({"advice": "📊 Для получения персональных советов нужно добавить хотя бы несколько операций дохода и расхода."})
+        
+        # Проверка на наличие расходов по категориям
         if not user_data['expense_by_category']:
             return jsonify({"advice": "💰 Добавьте несколько расходов по разным категориям, чтобы мы могли дать более точные советы."})
         
@@ -70,12 +77,12 @@ def generate_advice():
         # Вызов GPT с проверкой наличия данных
         if user_data['total_income'] > 0 or user_data['total_expense'] > 0:
             gpt_advice = generate_smart_advice(user_data_formatted)
-#         else:
-            # gpt_advice = "📝 Добавьте несколько операций, чтобы получить персонализированные финансовые советы."
-#             
-    # # except Exception as e:
-        # print(f"GPT Error: {e}")
-        # gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek или попробуйте позже."
+        else:
+            gpt_advice = "📝 Добавьте несколько операций, чтобы получить персонализированные финансовые советы."
+            
+    except Exception as e:
+        print(f"GPT Error: {e}")
+        gpt_advice = "❌ Не удалось получить AI-советы. Проверьте API ключ DeepSeek или попробуйте позже."
     
     return jsonify({"advice": gpt_advice})
 
@@ -590,6 +597,4 @@ def costs():
                 "q": q_res,
             }
 
-
     return render_template("analysis/costs.html", result=result)
-48
