@@ -8,7 +8,7 @@ API_TOKEN = os.getenv('HF_TOKEN', '')
 # Единственный клиент — HuggingFace Inference API
 client = OpenAI(
     api_key=API_TOKEN,
-    base_url="https://api-inference.huggingface.co/v1/"
+        base_url="https://router.huggingface.co/v1/"
 )
 
 print(f"HuggingFace подключен: {API_TOKEN[:10]}...")
