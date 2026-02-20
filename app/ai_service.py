@@ -1,20 +1,19 @@
 import os
 from openai import OpenAI
-from huggingface_hub import InferenceClient
 from datetime import datetime
-# (возможно другие импорты)
+
 # Загружаем токен из переменной окружения
 API_TOKEN = os.getenv('HF_TOKEN', '')
-client = OpenAI(
-    base_url="...",
-    api_key=API_TOKEN
-)
-print(f"✅ Hugging Face подключен: {API_TOKEN[:10]}...")
 
+# Единственный клиент — HuggingFace Inference API
 client = OpenAI(
-        api_key=API_TOKEN,
-        base_url="https://api-inference.huggingface.co/v1/"
+    api_key=API_TOKEN,
+    base_url="https://api-inference.huggingface.co/v1/"
 )
+
+print(f"HuggingFace подключен: {API_TOKEN[:10]}...")
+
+
 def generate_smart_advice(user_data):
     """
     Генерирует персонализированные советы на основе полных данных пользователя
@@ -44,156 +43,98 @@ def generate_smart_advice(user_data):
    - Предложи 2-3 вкусных домашних рецепта как альтернативу
    - Покажи экономию в цифрах
 4. Предложи реалистичный план оптимизации на месяц
-
 Ответ должен быть практичным, мотивирующим и с конкретными цифрами!
 """
-    
+
     try:
-
-        messages = [
-            {"role": "system", "content": "Ты опытный финансовый консультант, который дает практичные советы с юмором и конкретными примерами."},
-            {"role": "user", "content": prompt}
-        ]
-        
-        response = client.chat_completion(
-            messages=messages,
-            model="Qwen/Qwen2.5-72B-Instruct",
-            max_tokens=2000,
-            temperature=0.8
-        )
-        
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"Ошибка Hugging Face: {e}")
-        return f"❌ Ошибка генерации советов: {str(e)}"
-
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="Qwen/Qwen2.5-72B-Instruct",
             messages=[
                 {"role": "system", "content": "Ты опытный финансовый консультант, который дает практичные советы с юмором и конкретными примерами."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.8,
-            max_tokens=2000
+            max_tokens=2000,
+            temperature=0.8
         )
         return response.choices[0].message.content
     except Exception as e:
+        print(f"Ошибка HuggingFace: {e}")
         return f"Ошибка генерации советов: {str(e)}"
-
 
 
 def analyze_transaction(transaction_data):
     """
-    Моментальный анализ одной транзакции при добавлении
-    Возвращает совет сразу после добавления расхода
+    Моментальный анализ одной транзакции при добавлении.
+    Возвращает совет сразу после добавления расхода.
     """
     amount = transaction_data.get('amount', 0)
     category = transaction_data.get('category', '')
     user_income = transaction_data.get('user_monthly_income', 0)
-    
+
     if amount == 0 or user_income == 0:
         return None
-    
+
     percentage = (amount / user_income) * 100
-    
+
     # Анализ только для крупных расходов (>5% от дохода)
     if percentage < 5:
         return None
-        
+
     prompt = f"""
 Пользователь только что потратил {amount} ₽ на категорию "{category}".
 Его месячный доход: {user_income} ₽ (это {percentage:.1f}% от дохода).
-
 Дай ОДИН короткий совет (2-3 предложения):
 - Если это много — предложи конкретную альтернативу
 - Если нормально — похвали и дай совет как сэкономить в этой категории
-
 Будь дружелюбным и конкретным!
 """
-    
-    try:
 
-        messages = [{"role": "user", "content": prompt}]
-        
-        response = client.chat_completion(
-            messages=messages,
+    try:
+        response = client.chat.completions.create(
             model="Qwen/Qwen2.5-72B-Instruct",
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=150,
             temperature=0.7
         )
-        
-
-        response = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=150
-        )
-
         return response.choices[0].message.content
-    except:
+    except Exception as e:
+        print(f"Ошибка HuggingFace: {e}")
         return None
 
 
 def simulate_budget_changes(current_data, changes):
     """
-
     Симулирует изменения бюджета с помощью AI
-
-    Симулирует изменения бюджета с помощью GPT
-
     """
-    # Рассчитываем новые показатели
     new_income = current_data['avg_monthly_income'] + changes.get('increase_income', 0)
-    
-    # Уменьшаем расходы в выбранной категории
+
     category = changes.get('reduce_category')
     reduce_percent = changes.get('reduce_percent', 0)
-    
+
     new_expenses = current_data['avg_monthly_expense']
     reduction_amount = 0
-    
+
     if category and category in current_data['expense_by_category']:
         category_expense = current_data['expense_by_category'][category]
-
-
-        # Нормализуем категорийные расходы к месячным (делим на количество месяцев)
-
         months_count = current_data.get('months_count', 1)
         monthly_category_expense = category_expense / months_count
         reduction_amount = monthly_category_expense * (reduce_percent / 100)
         new_expenses -= reduction_amount
-    
+
     new_balance = new_income - new_expenses
     months = changes.get('simulation_months', 6)
     projected_savings = new_balance * months
-    
 
     current_balance = current_data.get('balance', 0)
-    
-
-    # Текущий баланс (может быть отрицательным)
-    current_balance = current_data.get('balance', 0)
-    
-    # Расчет процентного изменения
 
     savings_increase_percent = 0
     if current_balance != 0:
         savings_increase_percent = ((new_balance - current_balance) / abs(current_balance)) * 100
     elif new_balance > 0:
-
         savings_increase_percent = 100
-    
-    category_info = f"{category}" if category else "не выбрана"
-    reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
-    
 
-    
-    # Формируем информацию о категории для промпта
     category_info = f"{category}" if category else "не выбрана"
     reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
-    
-    # Детализация экономии
 
     if reduction_amount > 0 and category:
         monthly_saving = reduction_amount
@@ -201,10 +142,6 @@ def simulate_budget_changes(current_data, changes):
         saving_details = f"💰 Экономия в категории «{category}»: {monthly_saving:.0f} ₽/мес ({yearly_saving:.0f} ₽/год)"
     else:
         saving_details = "📉 Сокращение расходов не запланировано"
-    
-
-
-    # GPT анализ с усилением для ресторанов
 
     prompt = f"""
 Проанализируй финансовую симуляцию:
@@ -218,7 +155,6 @@ def simulate_budget_changes(current_data, changes):
 • Увеличение дохода: +{changes.get('increase_income', 0):.0f} ₽
 • Сокращение расходов в категории «{category_info}»: -{reduction_info}
 • Период симуляции: {months} месяцев
-
 {saving_details}
 
 📈 ПРОГНОЗ:
@@ -234,46 +170,24 @@ def simulate_budget_changes(current_data, changes):
 3. АЛЬТЕРНАТИВЫ: Предложи 2 других способа увеличить накопления без сильного ухудшения качества жизни.
 4. РИСКИ: Укажи возможные препятствия и как их избежать.
 5. МОТИВАЦИЯ: Напиши короткое вдохновляющее резюме.
-
-
 Отвечай на русском языке. Используй эмодзи и четкую структуру.
 """
-    
-    try:
-        messages = [
-            {"role": "system", "content": "Ты финансовый советник с 15-летним опытом. Помогаешь людям достигать финансовых целей. Даешь только конкретные, выполнимые советы с цифрами. Используешь эмодзи для наглядности."},
-            {"role": "user", "content": prompt}
-        ]
-        
-        response = client.chat_completion(
-            messages=messages,
-            model="Qwen/Qwen2.5-72B-Instruct",
-            max_tokens=1500,
-            temperature=0.7
-        )
-        
-        gpt_advice = response.choices[0].message.content
-    except Exception as e:
-        print(f"Ошибка Hugging Face: {e}")
-        gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже."
 
-
-    
     try:
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="Qwen/Qwen2.5-72B-Instruct",
             messages=[
                 {"role": "system", "content": "Ты финансовый советник с 15-летним опытом. Помогаешь людям достигать финансовых целей. Даешь только конкретные, выполнимые советы с цифрами. Используешь эмодзи для наглядности."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=1500
+            max_tokens=1500,
+            temperature=0.7
         )
         gpt_advice = response.choices[0].message.content
     except Exception as e:
-        gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже или проверьте API-ключ."
+        print(f"Ошибка HuggingFace: {e}")
+        gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже."
 
-    
     return {
         'current_income': current_data['avg_monthly_income'],
         'current_expense': current_data['avg_monthly_expense'],
@@ -309,28 +223,14 @@ def analyze_financial_health(user_data):
 4. 3 главные цели на ближайший год
 """
 
-    
     try:
-        messages = [{"role": "user", "content": prompt}]
-        
-        response = client.chat_completion(
-            messages=messages,
+        response = client.chat.completions.create(
             model="Qwen/Qwen2.5-72B-Instruct",
+            messages=[{"role": "user", "content": prompt}],
             max_tokens=1000,
             temperature=0.7
         )
-        
         return response.choices[0].message.content
-    except:
-        return "Анализ временно недоступен"
-
-    try:
-        response = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=1000
-        )
-        return response.choices[0].message.content
-    except:
+    except Exception as e:
+        print(f"Ошибка HuggingFace: {e}")
         return "Анализ временно недоступен"
