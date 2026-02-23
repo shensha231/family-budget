@@ -18,12 +18,18 @@ MODEL_ID = "HuggingFaceTB/SmolLM3-3B"
 print(f"HuggingFace connected: {API_TOKEN[:10]}...")
 
 
-def clean_html_text(text):
-    """Remove HTML tags and decode HTML entities from text"""
-    # Remove HTML tags
+def clean_html_text(text):    """Extract plain text from HTML content"""
+    # Remove script and style elements
+    text = re.sub(r'<script.*?</script>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<style.*?</style>', '', text, flags=re.DOTALL)
+    # Remove all HTML tags
     text = re.sub(r'<[^>]+>', '', text)
     # Decode HTML entities
     text = text.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
+    text = text.replace('&quot;', '"').replace('&apos;', "'")
+    text = text.replace('&nbsp;', ' ')
+    # Remove excessive whitespace
+    text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 def generate_smart_advice(user_data):
