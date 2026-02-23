@@ -1,25 +1,28 @@
 import os
-from openai import OpenAI
 from datetime import datetime
+from huggingface_hub import InferenceClient
 
-# Загружаем токен из переменной окружения
 API_TOKEN = os.getenv('HF_TOKEN', '')
 
-# Единственный клиент — HuggingFace Inference API
-client = OpenAI(
+if not API_TOKEN:
+    print("WARNING: HF_TOKEN not set!")
+
+client = InferenceClient(
+    provider="hf-inference",
     api_key=API_TOKEN,
-        base_url="https://router.huggingface.co/v1/"
 )
 
-print(f"HuggingFace подключен: {API_TOKEN[:10]}...")
+MODEL_ID = "HuggingFaceTB/SmolLM3-3B"
+
+print(f"HuggingFace connected: {API_TOKEN[:10]}...")
 
 
 def generate_smart_advice(user_data):
-    """
-    Генерирует персонализированные советы на основе полных данных пользователя
-    """
+    if not API_TOKEN:
+        return "AI советы временно недоступны: HF_TOKEN не настроен"
+
     prompt = f"""
-Ты — финансовый аналитик-консультант. Проанализируй следующие данные о семейном бюджете:
+Ты — финансовый аналитик-консультант. Проанализируй данные о семейном бюджете:
 
 📊 ДОХОДЫ:
 {user_data.get('income_summary', 'Нет данных')}
@@ -28,165 +31,144 @@ def generate_smart_advice(user_data):
 {user_data.get('expense_breakdown', 'Нет данных')}
 
 💰 ОБЩАЯ ИНФОРМАЦИЯ:
-- Общий доход: {user_data.get('total_income', 0)} ₽
-- Общий расход: {user_data.get('total_expense', 0)} ₽
-- Баланс: {user_data.get('balance', 0)} ₽
+- Общий доход: {user_data.get('total_income', 0)} руб
+- Общий расход: {user_data.get('total_expense', 0)} руб
+- Баланс: {user_data.get('balance', 0)} руб
 
-🎯 КРУПНЫЕ РАСХОДЫ (>10000 ₽):
+🎯 КРУПНЫЕ РАСХОДЫ (>10000 руб):
 {user_data.get('large_expenses', 'Нет крупных расходов')}
 
 ЗАДАНИЕ:
 1. Проанализируй структуру расходов и найди аномалии
-2. Дай 3-5 КОНКРЕТНЫХ, ОРИГИНАЛЬНЫХ советов (не банальные "меньше тратьте")
-3. Если есть категория "Рестораны/Еда вне дома" с большими тратами:
-   - Посчитай процент от дохода
-   - Предложи 2-3 вкусных домашних рецепта как альтернативу
-   - Покажи экономию в цифрах
-4. Предложи реалистичный план оптимизации на месяц
-Ответ должен быть практичным, мотивирующим и с конкретными цифрами!
+2. Дай 3-5 конкретных оригинальных советов
+3. Предложи реалистичный план оптимизации на месяц
+Отвечай по-русски, с эмодзи и конкретными цифрами.
 """
 
     try:
         response = client.chat.completions.create(
-            model="Qwen/Qwen2.5-72B-Instruct",
+            model=MODEL_ID,
             messages=[
-                {"role": "system", "content": "Ты опытный финансовый консультант, который дает практичные советы с юмором и конкретными примерами."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "Ты опытный финансовый консультант. Отвечаешь по-русски с эмодзи."},
+                {"role": "user", "content": prompt},
             ],
             max_tokens=2000,
-            temperature=0.8
+            temperature=0.8,
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Ошибка HuggingFace: {e}")
-        return f"Ошибка генерации советов: {str(e)}"
+        print(f"Error in generate_smart_advice: {e}")
+        return f"Ошибка генерации советов: {e}"
 
 
 def analyze_transaction(transaction_data):
-    """
-    Моментальный анализ одной транзакции при добавлении.
-    Возвращает совет сразу после добавления расхода.
-    """
-    amount = transaction_data.get('amount', 0)
-    category = transaction_data.get('category', '')
-    user_income = transaction_data.get('user_monthly_income', 0)
-
-    if amount == 0 or user_income == 0:
+    if not API_TOKEN:
         return None
-
-    percentage = (amount / user_income) * 100
-
-    # Анализ только для крупных расходов (>5% от дохода)
-    if percentage < 5:
-        return None
-
-    prompt = f"""
-Пользователь только что потратил {amount} ₽ на категорию "{category}".
-Его месячный доход: {user_income} ₽ (это {percentage:.1f}% от дохода).
-Дай ОДИН короткий совет (2-3 предложения):
-- Если это много — предложи конкретную альтернативу
-- Если нормально — похвали и дай совет как сэкономить в этой категории
-Будь дружелюбным и конкретным!
-"""
 
     try:
+        amount = float(transaction_data.get('amount', 0))
+        category = transaction_data.get('category', '')
+        user_income = float(transaction_data.get('user_monthly_income', 0))
+
+        if amount == 0 or user_income == 0:
+            return None
+
+        percentage = (amount / user_income) * 100
+
+        if percentage < 5:
+            return None
+
+        prompt = f"""
+Пользователь потратил {amount:.0f} руб на категорию "{category}".
+Месячный доход: {user_income:.0f} руб (это {percentage:.1f}% от дохода).
+Дай ОДИН короткий совет (2-3 предложения) по-русски:
+- Если много - предложи альтернативу
+- Если нормально - похвали и дай совет как сэкономить
+"""
+
         response = client.chat.completions.create(
-            model="Qwen/Qwen2.5-72B-Instruct",
+            model=MODEL_ID,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=150,
-            temperature=0.7
+            temperature=0.7,
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Ошибка HuggingFace: {e}")
+        print(f"Error in analyze_transaction: {e}")
         return None
 
 
 def simulate_budget_changes(current_data, changes):
-    """
-    Симулирует изменения бюджета с помощью AI
-    """
-    new_income = current_data['avg_monthly_income'] + changes.get('increase_income', 0)
-
-    category = changes.get('reduce_category')
-    reduce_percent = changes.get('reduce_percent', 0)
-
-    new_expenses = current_data['avg_monthly_expense']
-    reduction_amount = 0
-
-    if category and category in current_data['expense_by_category']:
-        category_expense = current_data['expense_by_category'][category]
-        months_count = current_data.get('months_count', 1)
-        monthly_category_expense = category_expense / months_count
-        reduction_amount = monthly_category_expense * (reduce_percent / 100)
-        new_expenses -= reduction_amount
-
-    new_balance = new_income - new_expenses
-    months = changes.get('simulation_months', 6)
-    projected_savings = new_balance * months
-
-    current_balance = current_data.get('balance', 0)
-
+    gpt_advice = ""
+    new_income = 0
+    new_expenses = 0
+    new_balance = 0
+    projected_savings = 0
+    current_balance = 0
     savings_increase_percent = 0
-    if current_balance != 0:
-        savings_increase_percent = ((new_balance - current_balance) / abs(current_balance)) * 100
-    elif new_balance > 0:
-        savings_increase_percent = 100
+    reduction_amount = 0
+    category = None
+    reduce_percent = 0
+    months = 6
 
-    category_info = f"{category}" if category else "не выбрана"
-    reduction_info = f"{reduce_percent}%" if reduce_percent > 0 else "0%"
-
-    if reduction_amount > 0 and category:
-        monthly_saving = reduction_amount
-        yearly_saving = monthly_saving * 12
-        saving_details = f"💰 Экономия в категории «{category}»: {monthly_saving:.0f} ₽/мес ({yearly_saving:.0f} ₽/год)"
+    if not API_TOKEN:
+        gpt_advice = "AI анализ недоступен: HF_TOKEN не настроен"
     else:
-        saving_details = "📉 Сокращение расходов не запланировано"
+        try:
+            new_income = float(current_data['avg_monthly_income']) + float(changes.get('increase_income', 0))
+            category = changes.get('reduce_category')
+            reduce_percent = float(changes.get('reduce_percent', 0))
+            new_expenses = float(current_data['avg_monthly_expense'])
+            reduction_amount = 0
 
-    prompt = f"""
-Проанализируй финансовую симуляцию:
+            if category and category in current_data['expense_by_category']:
+                category_expense = float(current_data['expense_by_category'][category])
+                months_count = float(current_data.get('months_count', 1))
+                monthly_category_expense = category_expense / months_count
+                reduction_amount = monthly_category_expense * (reduce_percent / 100)
+                new_expenses -= reduction_amount
 
-📊 ТЕКУЩЕЕ СОСТОЯНИЕ:
-• Средний доход: {current_data['avg_monthly_income']:.0f} ₽/мес
-• Средний расход: {current_data['avg_monthly_expense']:.0f} ₽/мес
-• Текущий баланс: {current_balance:.0f} ₽
+            new_balance = new_income - new_expenses
+            months = int(changes.get('simulation_months', 6))
+            projected_savings = new_balance * months
+            current_balance = float(current_data.get('balance', 0))
 
-🔄 ПЛАНИРУЕМЫЕ ИЗМЕНЕНИЯ:
-• Увеличение дохода: +{changes.get('increase_income', 0):.0f} ₽
-• Сокращение расходов в категории «{category_info}»: -{reduction_info}
-• Период симуляции: {months} месяцев
-{saving_details}
+            if current_balance != 0:
+                savings_increase_percent = ((new_balance - current_balance) / abs(current_balance)) * 100
+            elif new_balance > 0:
+                savings_increase_percent = 100
 
-📈 ПРОГНОЗ:
-• Новый доход: {new_income:.0f} ₽/мес
-• Новый расход: {new_expenses:.0f} ₽/мес
-• Новый баланс: {new_balance:.0f} ₽/мес
-• Накопления за {months} мес: {projected_savings:.0f} ₽
-• Изменение баланса: {savings_increase_percent:+.1f}%
+            prompt = f"""
+Проанализируй финансовую симуляцию и ответь по-русски:
 
-🎯 ЗАДАНИЕ:
-1. ОЦЕНКА РЕАЛИСТИЧНОСТИ: Поставь оценку от 1 до 10 и объясни почему.
-2. КОНКРЕТНЫЕ ШАГИ: Дай 3–4 практических совета, как реально достичь этих изменений.
-3. АЛЬТЕРНАТИВЫ: Предложи 2 других способа увеличить накопления без сильного ухудшения качества жизни.
-4. РИСКИ: Укажи возможные препятствия и как их избежать.
-5. МОТИВАЦИЯ: Напиши короткое вдохновляющее резюме.
-Отвечай на русском языке. Используй эмодзи и четкую структуру.
+ТЕКУЩЕЕ СОСТОЯНИЕ:
+- Доход: {current_data['avg_monthly_income']:.0f} руб/мес
+- Расход: {current_data['avg_monthly_expense']:.0f} руб/мес
+- Баланс: {current_balance:.0f} руб
+
+ПРОГНОЗ после изменений:
+- Новый доход: {new_income:.0f} руб/мес
+- Новый расход: {new_expenses:.0f} руб/мес
+- Новый баланс: {new_balance:.0f} руб/мес
+- Накопления за {months} мес: {projected_savings:.0f} руб
+
+Дай оценку реалистичности (1-10), 3 конкретных совета и мотивацию.
 """
 
-    try:
-        response = client.chat.completions.create(
-            model="Qwen/Qwen2.5-72B-Instruct",
-            messages=[
-                {"role": "system", "content": "Ты финансовый советник с 15-летним опытом. Помогаешь людям достигать финансовых целей. Даешь только конкретные, выполнимые советы с цифрами. Используешь эмодзи для наглядности."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1500,
-            temperature=0.7
-        )
-        gpt_advice = response.choices[0].message.content
-    except Exception as e:
-        print(f"Ошибка HuggingFace: {e}")
-        gpt_advice = "🤖 Не удалось получить AI-анализ. Попробуйте позже."
+            response = client.chat.completions.create(
+                model=MODEL_ID,
+                messages=[
+                    {"role": "system", "content": "Ты финансовый советник. Отвечаешь по-русски с эмодзи."},
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=1500,
+                temperature=0.7,
+            )
+            gpt_advice = response.choices[0].message.content
+
+        except Exception as e:
+            print(f"Error in simulate_budget_changes: {e}")
+            gpt_advice = "Не удалось получить AI-анализ. Попробуйте позже."
 
     return {
         'current_income': current_data['avg_monthly_income'],
@@ -206,31 +188,31 @@ def simulate_budget_changes(current_data, changes):
 
 
 def analyze_financial_health(user_data):
-    """
-    Комплексный анализ финансового здоровья пользователя
-    """
-    prompt = f"""
-Проведи комплексный анализ финансового здоровья на основе данных:
+    if not API_TOKEN:
+        return "Анализ недоступен: HF_TOKEN не настроен"
 
-Доходы: {user_data.get('total_income', 0)} ₽
-Расходы: {user_data.get('total_expense', 0)} ₽
-Сбережения: {user_data.get('savings', 0)} ₽
+    try:
+        prompt = f"""
+Проведи анализ финансового здоровья по-русски:
+
+Доходы: {float(user_data.get('total_income', 0)):.0f} руб
+Расходы: {float(user_data.get('total_expense', 0)):.0f} руб
+Сбережения: {float(user_data.get('savings', 0)):.0f} руб
 
 Оцени:
 1. Коэффициент финансовой независимости
-2. Рекомендации по "подушке безопасности"
+2. Рекомендации по подушке безопасности
 3. Потенциал для инвестиций
-4. 3 главные цели на ближайший год
+4. 3 главные цели на год
 """
 
-    try:
         response = client.chat.completions.create(
-            model="Qwen/Qwen2.5-72B-Instruct",
+            model=MODEL_ID,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=1000,
-            temperature=0.7
+            temperature=0.7,
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Ошибка HuggingFace: {e}")
+        print(f"Error in analyze_financial_health: {e}")
         return "Анализ временно недоступен"
