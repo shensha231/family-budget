@@ -73,7 +73,7 @@ def generate_smart_advice(user_data):
         return clean_html_text(response.choices[0].message.content)
     except Exception as e:
         print(f"Error in generate_smart_advice: {e}")
-        return f"Ошибка генерации советов: {e}"
+        return f"❌ Ошибка AI: {str(e)[:200]}. Проверьте HF_TOKEN в .env файле и убедитесь что он валидный."
 
 
 def analyze_transaction(transaction_data):
