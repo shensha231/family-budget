@@ -122,14 +122,14 @@ document.getElementById('get-advice-btn').addEventListener('click', function() {
         // Показать результат
         loading.style.display = 'none';
         result.style.display = 'block';
-        content.textContent = data.advice;
+        content.innerHTML = data.advice;
     })
     .catch(error => {
         // Показать ошибку
         loading.style.display = 'none';
         result.style.display = 'block';
         result.className = 'alert alert-danger mt-3';
-        content.textContent = '❌ Произошла ошибка при получении советов. Попробуйте позже.';
+        content.innerHTML = '❌ Произошла ошибка при получении советов. Попробуйте позже.';
         console.error('Error:', error);
     });
 });
