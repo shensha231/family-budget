@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from huggingface_hub import InferenceClient
+import re
 
 API_TOKEN = os.getenv('HF_TOKEN', '')
 
@@ -16,6 +17,14 @@ MODEL_ID = "HuggingFaceTB/SmolLM3-3B"
 
 print(f"HuggingFace connected: {API_TOKEN[:10]}...")
 
+
+def clean_html_text(text):
+    """Remove HTML tags and decode HTML entities from text"""
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    # Decode HTML entities
+    text = text.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&')
+    return text.strip()
 
 def generate_smart_advice(user_data):
     if not API_TOKEN:
@@ -55,7 +64,7 @@ def generate_smart_advice(user_data):
             max_tokens=2000,
             temperature=0.8,
         )
-        return response.choices[0].message.content
+        return clean_html_text(response.choices[0].message.content)
     except Exception as e:
         print(f"Error in generate_smart_advice: {e}")
         return f"Ошибка генерации советов: {e}"
