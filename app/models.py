@@ -15,14 +15,12 @@ class Family(db.Model):
     def generate_invite_code(self):
         self.invite_code = uuid.uuid4().hex[:8].upper()
 
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(128))
     family_id = db.Column(db.Integer, db.ForeignKey("family.id"))
-
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,20 +33,3 @@ class Transaction(db.Model):
     category = db.Column(db.String(64), nullable=False)
     description = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # НОВЫЕ ПОЛЯ ДЛЯ ЧЕКОВ
-    receipt_image = db.Column(db.String(512))  # Путь к скану чека
-    merchant_name = db.Column(db.String(128))  # Название магазина/ресторана
-    
-    # Связь с товарами из чека
-    items = db.relationship("TransactionItem", backref="transaction", lazy=True, cascade="all, delete-orphan")
-
-
-# НОВАЯ МОДЕЛЬ для детализации чеков
-class TransactionItem(db.Model):
-    """Товары из чека"""
-    id = db.Column(db.Integer, primary_key=True)
-    transaction_id = db.Column(db.Integer, db.ForeignKey("transaction.id"), nullable=False)
-    item_name = db.Column(db.String(128), nullable=False)
-    quantity = db.Column(db.Float, default=1.0)
-    price = db.Column(db.Float, nullable=False)
