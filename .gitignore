@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 passwords.txt 
 passwords.txt 
+.env 
