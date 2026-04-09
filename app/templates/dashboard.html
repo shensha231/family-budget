@@ -12,7 +12,7 @@
           Доходы vs Расходы
         </h5>
         <div class="chart-container" style="position: relative; height: 300px;">
-          anvas id="incomeExpenseChart"></canvas>
+          <canvas id="incomeExpenseChart"></canvas>
         </div>
       </div>
     </div>
@@ -24,7 +24,7 @@
           Расходы по категориям
         </h5>
         <div class="chart-container" style="position: relative; height: 300px;">
-          anvas id="categoryChart"></canvas>
+          <canvas id="categoryChart"></canvas>
         </div>
       </div>
     </div>
@@ -255,7 +255,6 @@ document.getElementById('transaction-form').addEventListener('submit', function(
 // ========== ГРАФИК 1: ДОХОДЫ VS РАСХОДЫ ==========
 const incomeExpenseCtx = document.getElementById('incomeExpenseChart');
 if (incomeExpenseCtx) {
-  // Получаем данные из Jinja2
   const totalIncome = {{ total_income | default(0) }};
   const totalExpense = {{ total_expense | default(0) }};
   
@@ -266,8 +265,8 @@ if (incomeExpenseCtx) {
       datasets: [{
         data: [totalIncome, totalExpense],
         backgroundColor: [
-          'rgba(34, 197, 94, 0.8)',   // Зелёный для доходов
-          'rgba(249, 115, 115, 0.8)'  // Красный для расходов
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(249, 115, 115, 0.8)'
         ],
         borderColor: [
           'rgba(34, 197, 94, 1)',
@@ -319,30 +318,27 @@ if (incomeExpenseCtx) {
 // ========== ГРАФИК 2: РАСХОДЫ ПО КАТЕГОРИЯМ ==========
 const categoryCtx = document.getElementById('categoryChart');
 if (categoryCtx) {
-  // Получаем данные расходов по категориям из Flask
   const expenseData = {{ expense_by_category | tojson | safe }};
   
-  // Преобразуем объект в массивы
   const categories = Object.keys(expenseData || {});
   const amounts = Object.values(expenseData || {});
   
-  // Генерируем красивые цвета для каждой категории
   const colors = [
-    'rgba(251, 191, 36, 0.8)',   // Золотой
-    'rgba(249, 115, 115, 0.8)',  // Красный
-    'rgba(96, 165, 250, 0.8)',   // Синий
-    'rgba(167, 139, 250, 0.8)',  // Фиолетовый
-    'rgba(52, 211, 153, 0.8)',   // Бирюзовый
-    'rgba(248, 113, 113, 0.8)',  // Коралловый
-    'rgba(253, 224, 71, 0.8)',   // Жёлтый
-    'rgba(156, 163, 175, 0.8)'   // Серый
+    'rgba(251, 191, 36, 0.8)',
+    'rgba(249, 115, 115, 0.8)',
+    'rgba(96, 165, 250, 0.8)',
+    'rgba(167, 139, 250, 0.8)',
+    'rgba(52, 211, 153, 0.8)',
+    'rgba(248, 113, 113, 0.8)',
+    'rgba(253, 224, 71, 0.8)',
+    'rgba(156, 163, 175, 0.8)'
   ];
   
   new Chart(categoryCtx, {
     type: 'bar',
     data: {
       labels: categories,
-      datasets: 
+      datasets: [{
         label: 'Расходы (₽)',
         data: amounts,
         backgroundColor: colors.slice(0, categories.length),
